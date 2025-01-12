@@ -2,7 +2,7 @@
 <link rel="icon" href="https://i.imgur.com/JP4qYpv.png">
   <meta charset="UTF-8">
   <title>Skybrute</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet">
   <style>
     :root {
       --primary-color: #6200ea;
@@ -470,6 +470,121 @@
         opacity: 1;
       }
     }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+        padding-bottom: calc(1rem + var(--now-playing-height));
+      }
+
+      .logo {
+        top: 0.5rem;
+        left: 0.5rem;
+        width: 120px;
+      }
+
+      .navigation {
+        top: 0.5rem;
+        right: 0.5rem;
+        gap: 0.5rem;
+      }
+
+      .nav-button {
+        padding: 0.5rem 0.7rem;
+        font-size: 0.9rem;
+      }
+
+      .search-container {
+        margin-top: 3rem;
+      }
+
+      .music-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+        padding: 1rem 0.5rem;
+      }
+
+      .music-card {
+        border-radius: 12px;
+      }
+
+      .music-card .thumbnail {
+        /* Keeping the aspect ratio */
+      }
+
+      .song-info {
+        padding: 0.8rem;
+      }
+
+      .song-title {
+        font-size: 1rem;
+        margin-bottom: 0.3rem;
+      }
+
+      #now-playing {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.5rem;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        height: auto; /* Adjust height for content */
+        min-height: var(--now-playing-height);
+      }
+
+      .now-playing-info {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 0.8rem;
+        max-width: none; /* Allow full width */
+        margin-bottom: 0.5rem;
+      }
+
+      .now-playing-thumbnail {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+      }
+
+      .playback-controls {
+        gap: 0.8rem;
+      }
+
+      .control-button svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      .control-circle {
+        width: 35px;
+        height: 35px;
+      }
+
+      .control-circle svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .progress-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+        margin: 0;
+      }
+
+      .time-display {
+        text-align: center;
+        min-width: auto;
+      }
+
+      .volume-control {
+        margin: 0;
+        gap: 0.5rem;
+      }
+
+      .volume-slider {
+        width: 80px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -772,7 +887,7 @@
       if (currentAudio && isDragging) {
         const rect = progressBar.getBoundingClientRect();
         let pos = (e.clientX - rect.left) / rect.width;
-                pos = Math.max(0, Math.min(1, pos));
+        pos = Math.max(0, Math.min(1, pos));
         progressFilled.style.width = `${pos * 100}%`;
         progressHandle.style.left = `${pos * 100}%`;
         currentAudio.currentTime = pos * currentAudio.duration;
@@ -860,90 +975,9 @@
       initializeVolume();
     });
 
-     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        // Tab ist nicht mehr sichtbar
-        console.log('Tab is now hidden');
-        // Speichere den aktuellen Zustand des Players
-         if (currentAudio && !currentAudio.paused) {
-            localStorage.setItem('backgroundPlayback', 'playing');
-            localStorage.setItem('backgroundTrackIndex', currentTrackIndex);
-            localStorage.setItem('backgroundCurrentTime', currentAudio.currentTime);
-            localStorage.setItem('backgroundShuffle', shuffleEnabled);
-            localStorage.setItem('backgroundAutoplay', autoplayEnabled);
-            localStorage.setItem('isPlayingBeforeHidden', 'true');
-         } else {
-             localStorage.removeItem('backgroundPlayback');
-            localStorage.removeItem('backgroundTrackIndex');
-            localStorage.removeItem('backgroundCurrentTime');
-            localStorage.removeItem('backgroundShuffle');
-            localStorage.removeItem('backgroundAutoplay');
-            localStorage.removeItem('isPlayingBeforeHidden');
-        }
-      } else {
-        // Tab ist wieder sichtbar
-        console.log('Tab is now visible');
-        const backgroundPlayback = localStorage.getItem('backgroundPlayback');
-        const backgroundTrackIndex = localStorage.getItem('backgroundTrackIndex');
-        const backgroundCurrentTime = localStorage.getItem('backgroundCurrentTime');
-        const backgroundShuffle = localStorage.getItem('backgroundShuffle');
-        const backgroundAutoplay = localStorage.getItem('backgroundAutoplay');
-         const isPlayingBeforeHidden = localStorage.getItem('isPlayingBeforeHidden');
-
-        if (backgroundPlayback === 'playing' && backgroundTrackIndex !== null) {
-          const index = parseInt(backgroundTrackIndex);
-          const time = parseFloat(backgroundCurrentTime);
-          const shouldShuffle = backgroundShuffle === 'true';
-          const shouldAutoplay = backgroundAutoplay === 'true';
-            const shouldPlay = isPlayingBeforeHidden === 'true';
-
-          if (index >= 0 && index < tracks.length) {
-            currentTrackIndex = index;
-            shuffleEnabled = shouldShuffle;
-            shuffleButton.classList.toggle('active', shuffleEnabled);
-            if (shuffleEnabled) {
-              shuffleButton.style.color = 'var(--shuffle-button-active-color)';
-            } else {
-              shuffleButton.style.color = 'var(--shuffle-button-color)';
-            }
-            autoplayEnabled = shouldAutoplay;
-            autoplayToggle.classList.toggle('active', autoplayEnabled);
-
-            const card = allMusicCards[currentTrackIndex];
-            if (card) {
-              const audio = card.querySelector('audio');
-              if (currentAudio && currentAudio !== audio) {
-                currentAudio.pause();
-              }
-              currentAudio = audio;
-              currentAudio.currentTime = time;
-              currentAudio.volume = parseFloat(volumeSlider.value);
-                if(shouldPlay){
-                    currentAudio.play().catch(error => {
-                        console.error("Fehler beim Wiederaufnehmen der Wiedergabe:", error);
-                        // Hier könntest du dem Nutzer eine Meldung anzeigen oder andere Fehlerbehandlung durchführen.
-                    });
-                     playPauseControl.innerHTML = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z"/></svg>';
-                    updatePlayIcon(card, true);
-                }
-
-
-              nowPlaying.style.display = 'flex';
-              updateNowPlayingInfo(tracks[currentTrackIndex].title, tracks[currentTrackIndex].thumbnail);
-
-
-
-
-              // Entferne die gespeicherten Hintergrundinformationen, da die Wiedergabe fortgesetzt wurde
-              localStorage.removeItem('backgroundPlayback');
-              localStorage.removeItem('backgroundTrackIndex');
-              localStorage.removeItem('backgroundCurrentTime');
-              localStorage.removeItem('backgroundShuffle');
-                localStorage.removeItem('backgroundAutoplay');
-                localStorage.removeItem('isPlayingBeforeHidden');
-            }
-          }
-        }
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && !musicGrid.children.length) {
+        initializeMusicPlayer();
       }
     });
 
@@ -1027,213 +1061,171 @@
     });
 
     function scanForMusicFiles() {
-      const songList = [
-        {
-          title: 'Analfried Song',
-          thumbnail: 'https://i.imgur.com/rU8nXfL.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/analfried%20song.mp3'
-        },
-        {
-          title: 'Ave Natale',
-          thumbnail: 'https://i.imgur.com/vnL2rRQ.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Ave Natale.mp3'
-        },
-        {
-          title: 'Besgen im Haus',
-          thumbnail: 'https://i.imgur.com/LGY7Ugh.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Besgen_im_Haus.mp3'
-        },
-        {
-          title: 'Beste im Biz',
-          thumbnail: 'https://i.imgur.com/eRufmDB.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Beste_im_Biz.mp3'
-        },
-        {
-          title: 'Clyde gegen Rüdiger und Niko',
-          thumbnail: 'https://i.imgur.com/zaQVCSY.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Clyde_gegen_R_diger_und_Niko.mp3'
-        },
-        {
-          title: 'Der Größte und Tollste',
-          thumbnail: 'https://i.imgur.com/G3MRTe1.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/größte und tollste.m4a'
-        },
-        {
-          title: 'Deutschland GmbH',
-          thumbnail: 'https://i.imgur.com/JEGB6yf.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Deutschland_GmbH.mp3'
-        },
-        {
-          title: 'Die Schule ist ein Witz',
-          thumbnail: 'https://i.imgur.com/A98pl0L.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Die_Schule_ist_ein_Witz.mp3'
-        },
-        {
-          title: 'Disstrack gegen Berrewitz',
-          thumbnail: 'https://i.imgur.com/HOJbtsF.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Disstrack_gegen_Berrewitz.mp3'
-        },
-        {
-          title: 'Disstrack gegen Besgen',
-          thumbnail: 'https://i.imgur.com/0lgqrve.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Disstrack gegen Besgen.mp3'
-        },
-        {
-          title: 'Dual Shadows',
-          thumbnail: 'https://i.imgur.com/MVqqDkZ.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Dual_Shadows.mp3'
-        },
-        {
-          title: 'Eclipsed Horizions',
-          thumbnail: 'https://i.imgur.com/IIqcUAP.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Eclipsed_Horizions.mp3'
-        },
-        {
-          title: 'Fick die Schule',
-          thumbnail: 'https://i.imgur.com/AvyljGe.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Fick_die_Schule.mp3'
-        },
-        {
-          title: 'Fisch an Land',
-          thumbnail: 'https://i.imgur.com/VyblhJC.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Fisch_an_Land.mp3'
-        },
-        {
-          title: 'Granny Rap - In den alten Jahren',
-          thumbnail: 'https://i.imgur.com/qGC2chy.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Granny_Rap___In_den_alten_Jahren.mp3'
-        },
-        {
-          title: 'Große Namen große Worte',
-          thumbnail: 'https://cdn2.suno.ai/cbe38b4f-45bc-46b6-89d2-f295497b98a5_e6de5789.jpeg',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Große Namen%2C große Worte.mp3'
-        },
-        {
-          title: 'Hattig\'s Schäferhund',
-          thumbnail: 'https://i.imgur.com/i3D57cb.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Hattig_s_Sch_ferhund.mp3'
-        },
-        {
-          title: 'Inferno',
-          thumbnail: 'https://i.imgur.com/0ONzAdK.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Inferno.mp3'
-        },
-        {
-          title: 'Jüdisch ist normal',
-          thumbnail: 'https://i.imgur.com/phhCDUv.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/J_disch_ist_normal.mp3'
-        },
-        {
-          title: 'Kein Limit',
-          thumbnail: 'https://cdn2.suno.ai/8cb3993b-df74-4171-80a6-cbee2eae2d0e_c9c50a12.jpeg',
-          path: 'https://cdn1.suno.ai/8cb3993b-df74-4171-80a6-cbee2eae2d0e.mp3'
-        },
-        {
-          title: 'Kein Platz für Schwächlinge',
-          thumbnail: 'https://i.imgur.com/xpAQcEB.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Kein_Platz_f_r_Schw_chlinge.mp3'
-        },
-        {
-          title: 'Last View',
-          thumbnail: 'https://i.imgur.com/oo5HheM.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Last_View.mp3'
-        },
-        {
-          title: 'Mamadou Song',
-          thumbnail: 'https://cdn.discordapp.com/avatars/1278460402719657984/95ebbb1971361670a93f10d0fe49b246.png?size=1024&width=940&height=940',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Mamadou Song.mp3'
-        },
-        {
-          title: 'Whispers of a broken heart',
-          thumbnail: 'https://i.imgur.com/PYkgDtl.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Whispers_of_a_broken_heart.mp3'
-        },
-        {
-          title: 'Rüdiger Song',
-          thumbnail: 'https://i.imgur.com/jth0slY.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/R_diger_Song.mp3'
-        },
-        {
-          title: 'Niko durch die Gänge',
-          thumbnail: 'https://cdn.discordapp.com/avatars/1278455593044148254/a_4e8372b72b160d18c49b0f4bc897e49e.gif?size=4096',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Niko%20durch%20die%20g%C3%A4nge.mp3'
-        },
-        {
-          title: 'Rise Above',
-          thumbnail: 'https://i.imgur.com/TR7N0j2.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Rise_Above.mp3'
-        },
-        {
-          title: 'Rise from the Ruins',
-          thumbnail: 'https://i.imgur.com/CbbUryc.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Rise_from_the_Ruins.mp3'
-        },
-        {
-          title: 'Seck am Start',
-          thumbnail: 'https://i.imgur.com/9E90qRs.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Seck_am_Start.mp3'
-        },
-        {
-          title: 'Soundclash Remix',
-          thumbnail: 'https://i.imgur.com/nVK3uhP.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Soundclash_Remix.mp3'
-        },
-         {
-          title: 'Ihr Abschaum',
-          thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Ihr%20Abschaum.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Ihr%20Abschaum.mp3'
-        },
-          {
-          title: 'Born in the Fire',
-          thumbnail: 'https://cdn2.suno.ai/image_large_32bcd2ed-b7cd-41b0-827c-8b8dba0e2465.jpeg',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Born in the Fire.mp3'
-        },
-           {
-          title: 'Adi gegen Niko',
-          thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Adi%20gegen%20Niko.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Adi%20gegen%20Niko.mp3'
-        },
-         {
-          title: 'Alles Mist',
-          thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Alles%20Mist.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Alles%20Mist.mp3'
-        },
-        {
-           title: 'Das Winni Schwein',
-          thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Das%20Winni%20Schwein.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Das%20Winni%20Schwein.mp3'
-        },
-          {
-             title: 'Du Wicht',
-          thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Du%20Wicht.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/HeyStan%20du%20wicht.mp3'
-        },
-           {
-              title: 'Monster in der Hose',
-          thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Monster%20in%20der%20Hose.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Monster%20in%20der%20Hose.mp3'
-        },
-           {
-               title: 'Ich bin ein Soziopath',
-          thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Mimon.jpg',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Ich%20bin%20ein%20Soziopath.mp3'
-        },
-         {
-          title: 'Analfried Frisst Niko',
-          thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Analfried%20frisst%20Niko.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Analfried%20frisst%20Niko.mp3'
-        },
-        {
-          title: 'Wannabe Legends',
-          thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Wannabe%20Legends.webp',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Wannabe_Legends.mp3'
-        },
-        {
-            title: 'Oh Clyde',
-          thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Oh%20Clyde.png',
-          path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Oh%20Clyde.mp3'
-        }
-      ];
+      const songList = [{
+        title: 'Analfried Song',
+        thumbnail: 'https://i.imgur.com/rU8nXfL.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/analfried%20song.mp3'
+      }, {
+        title: 'Ave Natale',
+        thumbnail: 'https://i.imgur.com/vnL2rRQ.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Ave Natale.mp3'
+      }, {
+        title: 'Besgen im Haus',
+        thumbnail: 'https://i.imgur.com/LGY7Ugh.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Besgen_im_Haus.mp3'
+      }, {
+        title: 'Beste im Biz',
+        thumbnail: 'https://i.imgur.com/eRufmDB.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Beste_im_Biz.mp3'
+      }, {
+        title: 'Clyde gegen Rüdiger und Niko',
+        thumbnail: 'https://i.imgur.com/zaQVCSY.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Clyde_gegen_R_diger_und_Niko.mp3'
+      }, {
+        title: 'Der Größte und Tollste',
+        thumbnail: 'https://i.imgur.com/G3MRTe1.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/größte und tollste.m4a'
+      }, {
+        title: 'Deutschland GmbH',
+        thumbnail: 'https://i.imgur.com/JEGB6yf.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Deutschland_GmbH.mp3'
+      }, {
+        title: 'Die Schule ist ein Witz',
+        thumbnail: 'https://i.imgur.com/A98pl0L.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Die_Schule_ist_ein_Witz.mp3'
+      }, {
+        title: 'Disstrack gegen Berrewitz',
+        thumbnail: 'https://i.imgur.com/HOJbtsF.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Disstrack_gegen_Berrewitz.mp3'
+      }, {
+        title: 'Disstrack gegen Besgen',
+        thumbnail: 'https://i.imgur.com/0lgqrve.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Disstrack gegen Besgen.mp3'
+      }, {
+        title: 'Dual Shadows',
+        thumbnail: 'https://i.imgur.com/MVqqDkZ.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Dual_Shadows.mp3'
+      }, {
+        title: 'Eclipsed Horizions',
+        thumbnail: 'https://i.imgur.com/IIqcUAP.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Eclipsed_Horizions.mp3'
+      }, {
+        title: 'Fick die Schule',
+        thumbnail: 'https://i.imgur.com/AvyljGe.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Fick_die_Schule.mp3'
+      }, {
+        title: 'Fisch an Land',
+        thumbnail: 'https://i.imgur.com/VyblhJC.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Fisch_an_Land.mp3'
+      }, {
+        title: 'Granny Rap - In den alten Jahren',
+        thumbnail: 'https://i.imgur.com/qGC2chy.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Granny_Rap___In_den_alten_Jahren.mp3'
+      }, {
+        title: 'Große Namen große Worte',
+        thumbnail: 'https://cdn2.suno.ai/cbe38b4f-45bc-46b6-89d2-f295497b98a5_e6de5789.jpeg',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Große Namen%2C große Worte.mp3'
+      }, {
+        title: 'Hattig\'s Schäferhund',
+        thumbnail: 'https://i.imgur.com/i3D57cb.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Hattig_s_Sch_ferhund.mp3'
+      }, {
+        title: 'Inferno',
+        thumbnail: 'https://i.imgur.com/0ONzAdK.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Inferno.mp3'
+      }, {
+        title: 'Jüdisch ist normal',
+        thumbnail: 'https://i.imgur.com/phhCDUv.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/J_disch_ist_normal.mp3'
+      }, {
+        title: 'Kein Limit',
+        thumbnail: 'https://cdn2.suno.ai/8cb3993b-df74-4171-80a6-cbee2eae2d0e_c9c50a12.jpeg',
+        path: 'https://cdn1.suno.ai/8cb3993b-df74-4171-80a6-cbee2eae2d0e.mp3'
+      }, {
+        title: 'Kein Platz für Schwächlinge',
+        thumbnail: 'https://i.imgur.com/xpAQcEB.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Kein_Platz_f_r_Schw_chlinge.mp3'
+      }, {
+        title: 'Last View',
+        thumbnail: 'https://i.imgur.com/oo5HheM.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Last_View.mp3'
+      }, {
+        title: 'Mamadou Song',
+        thumbnail: 'https://cdn.discordapp.com/avatars/1278460402719657984/95ebbb1971361670a93f10d0fe49b246.png?size=1024&width=940&height=940',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Mamadou Song.mp3'
+      }, {
+        title: 'Whispers of a broken heart',
+        thumbnail: 'https://i.imgur.com/PYkgDtl.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Whispers_of_a_broken_heart.mp3'
+      }, {
+        title: 'Rüdiger Song',
+        thumbnail: 'https://i.imgur.com/jth0slY.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/R_diger_Song.mp3'
+      }, {
+        title: 'Niko durch die Gänge',
+        thumbnail: 'https://cdn.discordapp.com/avatars/1278455593044148254/a_4e8372b72b160d18c49b0f4bc897e49e.gif?size=4096',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Niko%20durch%20die%20g%C3%A4nge.mp3'
+      }, {
+        title: 'Rise Above',
+        thumbnail: 'https://i.imgur.com/TR7N0j2.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Rise_Above.mp3'
+      }, {
+        title: 'Rise from the Ruins',
+        thumbnail: 'https://i.imgur.com/CbbUryc.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Rise_from_the_Ruins.mp3'
+      }, {
+        title: 'Seck am Start',
+        thumbnail: 'https://i.imgur.com/9E90qRs.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Seck_am_Start.mp3'
+      }, {
+        title: 'Soundclash Remix',
+        thumbnail: 'https://i.imgur.com/nVK3uhP.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Soundclash_Remix.mp3'
+      }, {
+        title: 'Ihr Abschaum',
+        thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Ihr%20Abschaum.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Ihr%20Abschaum.mp3'
+      }, {
+        title: 'Born in the Fire',
+        thumbnail: 'https://cdn2.suno.ai/image_large_32bcd2ed-b7cd-41b0-827c-8b8dba0e2465.jpeg',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Born in the Fire.mp3'
+      }, {
+        title: 'Adi gegen Niko',
+        thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Adi%20gegen%20Niko.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Adi%20gegen%20Niko.mp3'
+      }, {
+        title: 'Alles Mist',
+        thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Alles%20Mist.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Alles%20Mist.mp3'
+      }, {
+        title: 'Das Winni Schwein',
+        thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Das%20Winni%20Schwein.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Das%20Winni%20Schwein.mp3'
+      }, {
+        title: 'Du Wicht',
+        thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Du%20Wicht.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/HeyStan%20du%20wicht.mp3'
+      }, {
+        title: 'Monster in der Hose',
+        thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Monster%20in%20der%20Hose.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Monster%20in%20der%20Hose.mp3'
+      }, {
+        title: 'Ich bin ein Soziopath',
+        thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Mimon.jpg',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Ich%20bin%20ein%20Soziopath.mp3'
+      }, {
+        title: 'Analfried Frisst Niko',
+        thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Analfried%20frisst%20Niko.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Analfried%20frisst%20Niko.mp3'
+      }, {
+        title: 'Wannabe Legends',
+        thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Wannabe%20Legends.webp',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Wannabe_Legends.mp3'
+      }, {
+        title: 'Oh Clyde',
+        thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Oh%20Clyde.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Oh%20Clyde.mp3'
+      }];
       songList.sort((a, b) => a.title.localeCompare(b.title, 'de'));
       return new Promise(resolve => {
         setTimeout(() => {
@@ -1241,6 +1233,79 @@
         }, 100);
       });
     }
+
+    function isValidAudioTime(time) {
+      return typeof time === 'number' && !isNaN(time) && isFinite(time) && time >= 0;
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        console.log('Tab is now hidden');
+        // Store playback state
+        if (currentAudio && !currentAudio.paused) {
+          localStorage.setItem('backgroundPlayback', 'playing');
+          localStorage.setItem('backgroundTrackIndex', currentTrackIndex);
+          localStorage.setItem('backgroundCurrentTime', currentAudio.currentTime);
+          localStorage.setItem('backgroundShuffle', shuffleEnabled);
+          localStorage.setItem('backgroundAutoplay', autoplayEnabled);
+        } else {
+          localStorage.removeItem('backgroundPlayback');
+          localStorage.removeItem('backgroundTrackIndex');
+          localStorage.removeItem('backgroundCurrentTime');
+          localStorage.removeItem('backgroundShuffle');
+          localStorage.removeItem('backgroundAutoplay');
+        }
+      } else {
+        console.log('Tab is now visible');
+        const backgroundPlayback = localStorage.getItem('backgroundPlayback');
+        const backgroundTrackIndex = localStorage.getItem('backgroundTrackIndex');
+        const backgroundCurrentTime = localStorage.getItem('backgroundCurrentTime');
+        const backgroundShuffle = localStorage.getItem('backgroundShuffle');
+        const backgroundAutoplay = localStorage.getItem('backgroundAutoplay');
+
+        if (backgroundPlayback === 'playing' && backgroundTrackIndex !== null) {
+          const index = parseInt(backgroundTrackIndex);
+          const shouldShuffle = backgroundShuffle === 'true';
+          const shouldAutoplay = backgroundAutoplay === 'true';
+
+          if (index >= 0 && index < tracks.length) {
+            currentTrackIndex = index;
+            shuffleEnabled = shouldShuffle;
+            shuffleButton.classList.toggle('active', shuffleEnabled);
+            if (shuffleEnabled) {
+              shuffleButton.style.color = 'var(--shuffle-button-active-color)';
+            } else {
+              shuffleButton.style.color = 'var(--shuffle-button-color)';
+            }
+            autoplayEnabled = shouldAutoplay;
+            autoplayToggle.classList.toggle('active', autoplayEnabled);
+
+            const card = allMusicCards[currentTrackIndex];
+            if (card) {
+              const audio = card.querySelector('audio');
+              if (currentAudio && currentAudio !== audio) {
+                currentAudio.pause();
+              }
+              currentAudio = audio;
+              currentAudio.play().catch(error => {
+                console.error("Error resuming playback:", error);
+              });
+              nowPlaying.style.display = 'flex';
+              updateNowPlayingInfo(tracks[currentTrackIndex].title, tracks[currentTrackIndex].thumbnail);
+              playPauseControl.innerHTML = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z"/></svg>';
+              updatePlayIcon(card, true);
+
+              // Remove background info
+              localStorage.removeItem('backgroundPlayback');
+              localStorage.removeItem('backgroundTrackIndex');
+              localStorage.removeItem('backgroundCurrentTime');
+              localStorage.removeItem('backgroundShuffle');
+              localStorage.removeItem('backgroundAutoplay');
+            }
+          }
+        }
+      }
+    });
   </script>
 </body>
 </html>
