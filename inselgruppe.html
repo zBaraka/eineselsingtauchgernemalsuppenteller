@@ -2,7 +2,7 @@
 <link rel="icon" href="https://i.imgur.com/JP4qYpv.png">
   <meta charset="UTF-8">
   <title>Skybrute</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary-color: #6200ea;
@@ -772,7 +772,7 @@
       if (currentAudio && isDragging) {
         const rect = progressBar.getBoundingClientRect();
         let pos = (e.clientX - rect.left) / rect.width;
-        pos = Math.max(0, Math.min(1, pos));
+                pos = Math.max(0, Math.min(1, pos));
         progressFilled.style.width = `${pos * 100}%`;
         progressHandle.style.left = `${pos * 100}%`;
         currentAudio.currentTime = pos * currentAudio.duration;
@@ -860,9 +860,90 @@
       initializeVolume();
     });
 
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && !musicGrid.children.length) {
-        initializeMusicPlayer();
+     document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        // Tab ist nicht mehr sichtbar
+        console.log('Tab is now hidden');
+        // Speichere den aktuellen Zustand des Players
+         if (currentAudio && !currentAudio.paused) {
+            localStorage.setItem('backgroundPlayback', 'playing');
+            localStorage.setItem('backgroundTrackIndex', currentTrackIndex);
+            localStorage.setItem('backgroundCurrentTime', currentAudio.currentTime);
+            localStorage.setItem('backgroundShuffle', shuffleEnabled);
+            localStorage.setItem('backgroundAutoplay', autoplayEnabled);
+            localStorage.setItem('isPlayingBeforeHidden', 'true');
+         } else {
+             localStorage.removeItem('backgroundPlayback');
+            localStorage.removeItem('backgroundTrackIndex');
+            localStorage.removeItem('backgroundCurrentTime');
+            localStorage.removeItem('backgroundShuffle');
+            localStorage.removeItem('backgroundAutoplay');
+            localStorage.removeItem('isPlayingBeforeHidden');
+        }
+      } else {
+        // Tab ist wieder sichtbar
+        console.log('Tab is now visible');
+        const backgroundPlayback = localStorage.getItem('backgroundPlayback');
+        const backgroundTrackIndex = localStorage.getItem('backgroundTrackIndex');
+        const backgroundCurrentTime = localStorage.getItem('backgroundCurrentTime');
+        const backgroundShuffle = localStorage.getItem('backgroundShuffle');
+        const backgroundAutoplay = localStorage.getItem('backgroundAutoplay');
+         const isPlayingBeforeHidden = localStorage.getItem('isPlayingBeforeHidden');
+
+        if (backgroundPlayback === 'playing' && backgroundTrackIndex !== null) {
+          const index = parseInt(backgroundTrackIndex);
+          const time = parseFloat(backgroundCurrentTime);
+          const shouldShuffle = backgroundShuffle === 'true';
+          const shouldAutoplay = backgroundAutoplay === 'true';
+            const shouldPlay = isPlayingBeforeHidden === 'true';
+
+          if (index >= 0 && index < tracks.length) {
+            currentTrackIndex = index;
+            shuffleEnabled = shouldShuffle;
+            shuffleButton.classList.toggle('active', shuffleEnabled);
+            if (shuffleEnabled) {
+              shuffleButton.style.color = 'var(--shuffle-button-active-color)';
+            } else {
+              shuffleButton.style.color = 'var(--shuffle-button-color)';
+            }
+            autoplayEnabled = shouldAutoplay;
+            autoplayToggle.classList.toggle('active', autoplayEnabled);
+
+            const card = allMusicCards[currentTrackIndex];
+            if (card) {
+              const audio = card.querySelector('audio');
+              if (currentAudio && currentAudio !== audio) {
+                currentAudio.pause();
+              }
+              currentAudio = audio;
+              currentAudio.currentTime = time;
+              currentAudio.volume = parseFloat(volumeSlider.value);
+                if(shouldPlay){
+                    currentAudio.play().catch(error => {
+                        console.error("Fehler beim Wiederaufnehmen der Wiedergabe:", error);
+                        // Hier könntest du dem Nutzer eine Meldung anzeigen oder andere Fehlerbehandlung durchführen.
+                    });
+                     playPauseControl.innerHTML = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z"/></svg>';
+                    updatePlayIcon(card, true);
+                }
+
+
+              nowPlaying.style.display = 'flex';
+              updateNowPlayingInfo(tracks[currentTrackIndex].title, tracks[currentTrackIndex].thumbnail);
+
+
+
+
+              // Entferne die gespeicherten Hintergrundinformationen, da die Wiedergabe fortgesetzt wurde
+              localStorage.removeItem('backgroundPlayback');
+              localStorage.removeItem('backgroundTrackIndex');
+              localStorage.removeItem('backgroundCurrentTime');
+              localStorage.removeItem('backgroundShuffle');
+                localStorage.removeItem('backgroundAutoplay');
+                localStorage.removeItem('isPlayingBeforeHidden');
+            }
+          }
+        }
       }
     });
 
@@ -1097,47 +1178,47 @@
           thumbnail: 'https://i.imgur.com/nVK3uhP.png',
           path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Soundclash_Remix.mp3'
         },
-        {
+         {
           title: 'Ihr Abschaum',
           thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Ihr%20Abschaum.png',
           path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Ihr%20Abschaum.mp3'
         },
-        {
+          {
           title: 'Born in the Fire',
           thumbnail: 'https://cdn2.suno.ai/image_large_32bcd2ed-b7cd-41b0-827c-8b8dba0e2465.jpeg',
           path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Born in the Fire.mp3'
         },
-        {
+           {
           title: 'Adi gegen Niko',
           thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Adi%20gegen%20Niko.png',
           path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Adi%20gegen%20Niko.mp3'
         },
-        {
+         {
           title: 'Alles Mist',
           thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Alles%20Mist.png',
           path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Alles%20Mist.mp3'
         },
         {
-          title: 'Das Winni Schwein',
+           title: 'Das Winni Schwein',
           thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Das%20Winni%20Schwein.png',
           path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Das%20Winni%20Schwein.mp3'
         },
-        {
-          title: 'Du Wicht',
+          {
+             title: 'Du Wicht',
           thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Du%20Wicht.png',
           path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/HeyStan%20du%20wicht.mp3'
         },
-        {
-          title: 'Monster in der Hose',
+           {
+              title: 'Monster in der Hose',
           thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Monster%20in%20der%20Hose.png',
           path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Monster%20in%20der%20Hose.mp3'
         },
-        {
-          title: 'Ich bin ein Soziopath',
+           {
+               title: 'Ich bin ein Soziopath',
           thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Mimon.jpg',
           path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Ich%20bin%20ein%20Soziopath.mp3'
         },
-        {
+         {
           title: 'Analfried Frisst Niko',
           thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Analfried%20frisst%20Niko.png',
           path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Analfried%20frisst%20Niko.mp3'
@@ -1148,7 +1229,7 @@
           path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Wannabe%20Legends.mp3'
         },
         {
-          title: 'Oh Clyde',
+            title: 'Oh Clyde',
           thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Oh%20Clyde.png',
           path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Oh%20Clyde.mp3'
         }
