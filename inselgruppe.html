@@ -1,4 +1,4 @@
-<html><head><base href="www.skybrute.de">
+<head><base href="www.skybrute.de">
 <link rel="icon" href="https://i.imgur.com/JP4qYpv.png">
   <meta charset="UTF-8">
   <title>Skybrute</title>
@@ -21,14 +21,12 @@
       --shuffle-button-color: #ffffff;
       --shuffle-button-active-color: var(--accent-color);
     }
-
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
-
     body {
       background: var(--background-color);
       color: var(--text-color);
@@ -36,13 +34,11 @@
       padding: 2rem;
       padding-bottom: calc(2rem + var(--now-playing-height));
     }
-
     .container {
       max-width: 1200px;
       margin: 0 auto;
       margin-bottom: 4rem;
     }
-
     .logo {
       position: fixed;
       top: 1rem;
@@ -51,13 +47,11 @@
       height: auto;
       z-index: 100;
     }
-
     .logo img {
       width: 100%;
       height: auto;
       display: block;
     }
-
     .navigation {
       position: fixed;
       top: 1rem;
@@ -66,7 +60,6 @@
       display: flex;
       gap: 1rem;
     }
-
     .nav-button {
       background: none;
       border: none;
@@ -77,19 +70,16 @@
       border-radius: 10px;
       text-decoration: none;
     }
-
     .nav-button:hover {
       color: var(--primary-color);
       background-color: rgba(255, 255, 255, 0.1);
     }
-
     .search-container {
       margin: 4rem auto 1rem;
       max-width: 600px;
       padding: 0 1rem;
       animation: fadeIn 1s ease-in-out;
     }
-
     .search-input {
       width: 100%;
       padding: 1rem 1.2rem;
@@ -100,12 +90,10 @@
       color: var(--text-color);
       box-shadow: 0 2px 5px var(--shadow-color);
     }
-
     .search-input:focus {
       outline: none;
       box-shadow: 0 0 0 2px var(--primary-color);
     }
-
     .music-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -113,7 +101,6 @@
       padding: 2rem 1rem;
       animation: fadeInUp 1s ease-in-out;
     }
-
     .music-card {
       background: var(--card-background);
       border-radius: 16px;
@@ -124,12 +111,10 @@
       flex-direction: column;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-
     .music-card:hover {
       transform: scale(var(--card-hover-scale));
       box-shadow: 0 10px 25px var(--shadow-color);
     }
-
     .music-card .thumbnail {
       width: 100%;
       aspect-ratio: 1 / 1;
@@ -140,19 +125,16 @@
       align-items: center;
       justify-content: center;
     }
-
     .music-card .thumbnail img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       aspect-ratio: 1 / 1;
     }
-
     .music-card:hover .thumbnail img {
       transform: scale(1.1);
       transition: transform 0.3s ease;
     }
-
     .play-overlay {
       position: absolute;
       top: 0;
@@ -166,11 +148,9 @@
       opacity: 0;
       transition: opacity 0.2s ease-in-out;
     }
-
     .music-card:hover .play-overlay {
       opacity: 1;
     }
-
     .play-icon {
       width: 60px;
       height: 60px;
@@ -178,11 +158,9 @@
       text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
       transition: transform 0.2s ease-in-out;
     }
-
     .play-overlay:hover .play-icon {
       transform: scale(1.1);
     }
-
     .song-info {
       padding: 1.2rem;
       flex: 1;
@@ -190,7 +168,6 @@
       flex-direction: column;
       justify-content: space-between;
     }
-
     .song-title {
       font-size: 1.1rem;
       font-weight: 600;
@@ -200,11 +177,9 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-
     .audio-control {
       display: none;
     }
-
     #now-playing {
       position: fixed;
       bottom: 0;
@@ -223,7 +198,6 @@
       backdrop-filter: blur(15px);
       z-index: 100;
     }
-
     .now-playing-info {
       display: flex;
       align-items: center;
@@ -234,7 +208,6 @@
       overflow: hidden;
       animation: slideUp 0.5s ease-in-out;
     }
-
     .now-playing-thumbnail {
       width: 70px;
       height: 70px;
@@ -248,17 +221,14 @@
       align-items: center;
       justify-content: center;
     }
-
     .now-playing-thumbnail img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-
     .now-playing-thumbnail:hover {
       transform: scale(1.05);
     }
-
     .now-playing-title {
       font-size: 1.1rem;
       font-weight: 500;
@@ -266,14 +236,12 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
     .playback-controls {
       display: flex;
       align-items: center;
       gap: 1.5rem;
       flex: 0 0 auto;
     }
-
     .control-button {
       background: none;
       border: none;
@@ -286,33 +254,26 @@
       align-items: center;
       justify-content: center;
     }
-
     .control-button:hover {
       color: var(--primary-color);
       background-color: rgba(255, 255, 255, 0.1);
     }
-
     .control-button.active {
       color: var(--secondary-color);
     }
-
     .control-button.active svg path {
       fill: var(--primary-color);
     }
-
     .control-button svg {
       width: 30px;
       height: 30px;
     }
-
     .shuffle-button {
       color: var(--shuffle-button-color);
     }
-
     .shuffle-button.active {
       color: var(--shuffle-button-active-color);
     }
-
     .control-circle {
       background: var(--card-background);
       border: none;
@@ -327,16 +288,13 @@
       justify-content: center;
       box-shadow: 0 3px 8px var(--shadow-color);
     }
-
     .control-circle svg {
       width: 24px;
       height: 24px;
     }
-
     .control-circle.active {
       color: var(--accent-color);
     }
-
     .progress-container {
       flex: 2 1 300px;
       display: flex;
@@ -346,7 +304,6 @@
       width: 100%;
       animation: zoomIn 0.5s ease-in-out;
     }
-
     .progress-bar {
       flex: 1;
       height: 8px;
@@ -356,14 +313,12 @@
       cursor: pointer;
       overflow: hidden;
     }
-
     .progress-filled {
       height: 100%;
       background: var(--primary-color);
       width: 0%;
       transition: width 0.1s linear;
     }
-
     .progress-handle {
       position: absolute;
       top: 50%;
@@ -376,13 +331,11 @@
       cursor: grab;
       transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
     }
-
     .progress-handle:active {
       cursor: grabbing;
       transform: translate(-50%, -50%) scale(1.2);
       background-color: white;
     }
-
     .volume-control {
       display: flex;
       align-items: center;
@@ -390,7 +343,6 @@
       margin: 0 1.5rem;
       flex: 0 0 auto;
     }
-
     .volume-slider {
       width: 120px;
       height: 6px;
@@ -399,7 +351,6 @@
       border-radius: 3px;
       outline: none;
     }
-
     .volume-slider::-webkit-slider-thumb {
       -webkit-appearance: none;
       width: 16px;
@@ -409,22 +360,18 @@
       cursor: pointer;
       transition: background-color 0.2s ease-in-out;
     }
-
     .volume-slider::-webkit-slider-thumb:hover {
       background-color: white;
     }
-
     .toggle-button {
       display: none;
     }
-
     .time-display {
       font-size: 1rem;
       color: var(--text-color);
       min-width: 120px;
       text-align: center;
     }
-
     .no-results {
       text-align: center;
       padding: 3rem;
@@ -432,23 +379,19 @@
       grid-column: 1 / -1;
       font-size: 1.2rem;
     }
-
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
     }
-
     @keyframes pulse {
       0% { transform: scale(1); }
       50% { transform: scale(1.1); }
       100% { transform: scale(1); }
     }
-
     @keyframes slideUp {
       from { transform: translateY(30px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
-
     @keyframes fadeInUp {
       from {
         opacity: 0;
@@ -459,7 +402,6 @@
         transform: translateY(0);
       }
     }
-
     @keyframes zoomIn {
       from {
         transform: scale(0.9);
@@ -468,121 +410,6 @@
       to {
         transform: scale(1);
         opacity: 1;
-      }
-    }
-
-    @media (max-width: 768px) {
-      body {
-        padding: 1rem;
-        padding-bottom: calc(1rem + var(--now-playing-height));
-      }
-
-      .logo {
-        top: 0.5rem;
-        left: 0.5rem;
-        width: 120px;
-      }
-
-      .navigation {
-        top: 0.5rem;
-        right: 0.5rem;
-        gap: 0.5rem;
-      }
-
-      .nav-button {
-        padding: 0.5rem 0.7rem;
-        font-size: 0.9rem;
-      }
-
-      .search-container {
-        margin-top: 3rem;
-      }
-
-      .music-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 1rem;
-        padding: 1rem 0.5rem;
-      }
-
-      .music-card {
-        border-radius: 12px;
-      }
-
-      .music-card .thumbnail {
-        /* Keeping the aspect ratio */
-      }
-
-      .song-info {
-        padding: 0.8rem;
-      }
-
-      .song-title {
-        font-size: 1rem;
-        margin-bottom: 0.3rem;
-      }
-
-      #now-playing {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 0.5rem;
-        border-top-left-radius: 0;
-        border-top-right-radius: 0;
-        height: auto; /* Adjust height for content */
-        min-height: var(--now-playing-height);
-      }
-
-      .now-playing-info {
-        flex-direction: row;
-        justify-content: flex-start;
-        gap: 0.8rem;
-        max-width: none; /* Allow full width */
-        margin-bottom: 0.5rem;
-      }
-
-      .now-playing-thumbnail {
-        width: 50px;
-        height: 50px;
-        border-radius: 10px;
-      }
-
-      .playback-controls {
-        gap: 0.8rem;
-      }
-
-      .control-button svg {
-        width: 24px;
-        height: 24px;
-      }
-
-      .control-circle {
-        width: 35px;
-        height: 35px;
-      }
-
-      .control-circle svg {
-        width: 20px;
-        height: 20px;
-      }
-
-      .progress-container {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.5rem;
-        margin: 0;
-      }
-
-      .time-display {
-        text-align: center;
-        min-width: auto;
-      }
-
-      .volume-control {
-        margin: 0;
-        gap: 0.5rem;
-      }
-
-      .volume-slider {
-        width: 80px;
       }
     }
   </style>
@@ -611,7 +438,6 @@
       <!-- Music cards will be dynamically inserted here -->
     </div>
   </div>
-
   <div id="now-playing">
     <div class="now-playing-info">
       <div class="now-playing-thumbnail" id="now-playing-thumbnail"></div>
@@ -646,7 +472,6 @@
       <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.01" value="1" aria-label="Volume Slider">
     </div>
   </div>
-
   <script>
     const musicGrid = document.getElementById('music-grid');
     const nowPlaying = document.getElementById('now-playing');
@@ -672,13 +497,11 @@
     let isDragging = false;
     let shuffleEnabled = false;
     document.documentElement.style.transition = 'none';
-
     function formatTime(seconds) {
       const minutes = Math.floor(seconds / 60);
       const remainingSeconds = Math.floor(seconds % 60);
       return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
-
     function updateTimeDisplay(audio) {
       if (audio && !isNaN(audio.duration)) {
         timeDisplay.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
@@ -686,7 +509,6 @@
         timeDisplay.textContent = '0:00 / 0:00';
       }
     }
-
     function updateNowPlayingInfo(title, thumbnailSrc) {
       currentSongDisplay.textContent = title;
       const thumbnailContainer = document.getElementById('now-playing-thumbnail');
@@ -694,7 +516,6 @@
                  <path fill="currentColor" d="M12,3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
                </svg>`;
     }
-
     function createMusicCard(song, index) {
       const card = document.createElement('div');
       card.className = 'music-card';
@@ -767,7 +588,6 @@
       });
       return card;
     }
-
     function updatePlayIcon(card, isPlaying) {
       const playIcon = card.querySelector('.play-icon');
       if (isPlaying) {
@@ -776,11 +596,9 @@
         playIcon.innerHTML = '<path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z"/>';
       }
     }
-
     searchInput.addEventListener('input', e => {
       filterSongs(e.target.value);
     });
-
     function filterSongs(searchTerm) {
       const normalizedSearch = searchTerm.toLowerCase();
       let hasResults = false;
@@ -804,7 +622,6 @@
         musicGrid.appendChild(noResults);
       }
     }
-
     function playNextTrack() {
       if (tracks.length === 0) return;
       if (shuffleEnabled) {
@@ -823,7 +640,6 @@
         nextCard.querySelector('.play-overlay').click();
       }
     }
-
     function playPrevTrack() {
       if (tracks.length === 0) return;
       currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
@@ -834,7 +650,6 @@
         prevCard.querySelector('.play-overlay').click();
       }
     }
-
     playPauseControl.addEventListener('click', () => {
       if (currentAudio) {
         if (currentAudio.paused) {
@@ -848,10 +663,8 @@
         }
       }
     });
-
     nextTrackButton.addEventListener('click', playNextTrack);
     prevTrackButton.addEventListener('click', playPrevTrack);
-
     shuffleButton.addEventListener('click', () => {
       shuffleEnabled = !shuffleEnabled;
       shuffleButton.classList.toggle('active', shuffleEnabled);
@@ -862,7 +675,6 @@
         shuffleButton.style.color = 'var(--shuffle-button-color)';
       }
     });
-
     progressBar.addEventListener('click', e => {
       if (currentAudio) {
         const rect = progressBar.getBoundingClientRect();
@@ -870,19 +682,16 @@
         currentAudio.currentTime = pos * currentAudio.duration;
       }
     });
-
     progressHandle.addEventListener('mousedown', e => {
       isDragging = true;
       document.addEventListener('mousemove', onDrag);
       document.addEventListener('mouseup', stopDrag);
     });
-
     progressHandle.addEventListener('touchstart', e => {
       isDragging = true;
       document.addEventListener('touchmove', onDragTouch);
       document.addEventListener('touchend', stopDrag);
     });
-
     function onDrag(e) {
       if (currentAudio && isDragging) {
         const rect = progressBar.getBoundingClientRect();
@@ -893,7 +702,6 @@
         currentAudio.currentTime = pos * currentAudio.duration;
       }
     }
-
     function onDragTouch(e) {
       if (currentAudio && isDragging) {
         const touch = e.touches[0];
@@ -905,7 +713,6 @@
         currentAudio.currentTime = pos * currentAudio.duration;
       }
     }
-
     function stopDrag() {
       isDragging = false;
       document.removeEventListener('mousemove', onDrag);
@@ -913,7 +720,6 @@
       document.removeEventListener('touchmove', onDragTouch);
       document.removeEventListener('touchend', stopDrag);
     }
-
     function handleKeyboardShortcuts(e) {
       const tag = e.target.tagName.toLowerCase();
       if (tag === 'input' || tag === 'textarea') return;
@@ -966,21 +772,17 @@
           break;
       }
     }
-
     document.addEventListener('keydown', handleKeyboardShortcuts);
-
     document.addEventListener('DOMContentLoaded', () => {
       initializeMusicPlayer();
       updateVolumeIcon(volumeSlider.value);
       initializeVolume();
     });
-
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden && !musicGrid.children.length) {
         initializeMusicPlayer();
       }
     });
-
     function initializeMusicPlayer() {
       musicGrid.innerHTML = '';
       const savedAutoplay = localStorage.getItem('autoplayEnabled');
@@ -1007,7 +809,6 @@
         });
       });
     }
-
     function updateVolumeIcon(volume) {
       let path = '';
       if (volume > 0.5) {
@@ -1019,7 +820,6 @@
       }
       volumeButton.innerHTML = `<svg viewBox="0 0 24 24">${path}</svg>`;
     }
-
     function initializeVolume() {
       const savedVolume = localStorage.getItem('volume');
       if (savedVolume !== null) {
@@ -1030,7 +830,6 @@
         updateVolumeIcon(savedVolume);
       }
     }
-
     volumeSlider.addEventListener('input', e => {
       if (currentAudio) {
         currentAudio.volume = e.target.value;
@@ -1039,7 +838,6 @@
       lastVolume = e.target.value;
       updateVolumeIcon(e.target.value);
     });
-
     volumeButton.addEventListener('click', () => {
       if (currentAudio) {
         if (currentAudio.volume > 0) {
@@ -1053,7 +851,6 @@
       }
       localStorage.setItem('volume', currentAudio ? currentAudio.volume : lastVolume);
     });
-
     autoplayToggle.addEventListener('click', () => {
       autoplayEnabled = !autoplayEnabled;
       autoplayToggle.classList.toggle('active', autoplayEnabled);
