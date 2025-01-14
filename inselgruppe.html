@@ -1023,6 +1023,10 @@
         thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Wannabe%20Legends.webp',
         path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Wannabe_Legends.mp3'
       }, {
+                title: 'Schmitzgame Song',
+        thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Schmitzgame%20Song.png',
+        path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Schmitzgame%20Song.mp3'
+      }, {
         title: 'Oh Clyde',
         thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Oh%20Clyde.png',
         path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Oh%20Clyde.mp3'
@@ -1035,78 +1039,7 @@
       });
     }
 
-    function isValidAudioTime(time) {
-      return typeof time === 'number' && !isNaN(time) && isFinite(time) && time >= 0;
-    }
 
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        console.log('Tab is now hidden');
-        // Store playback state
-        if (currentAudio && !currentAudio.paused) {
-          localStorage.setItem('backgroundPlayback', 'playing');
-          localStorage.setItem('backgroundTrackIndex', currentTrackIndex);
-          localStorage.setItem('backgroundCurrentTime', currentAudio.currentTime);
-          localStorage.setItem('backgroundShuffle', shuffleEnabled);
-          localStorage.setItem('backgroundAutoplay', autoplayEnabled);
-        } else {
-          localStorage.removeItem('backgroundPlayback');
-          localStorage.removeItem('backgroundTrackIndex');
-          localStorage.removeItem('backgroundCurrentTime');
-          localStorage.removeItem('backgroundShuffle');
-          localStorage.removeItem('backgroundAutoplay');
-        }
-      } else {
-        console.log('Tab is now visible');
-        const backgroundPlayback = localStorage.getItem('backgroundPlayback');
-        const backgroundTrackIndex = localStorage.getItem('backgroundTrackIndex');
-        const backgroundCurrentTime = localStorage.getItem('backgroundCurrentTime');
-        const backgroundShuffle = localStorage.getItem('backgroundShuffle');
-        const backgroundAutoplay = localStorage.getItem('backgroundAutoplay');
-
-        if (backgroundPlayback === 'playing' && backgroundTrackIndex !== null) {
-          const index = parseInt(backgroundTrackIndex);
-          const shouldShuffle = backgroundShuffle === 'true';
-          const shouldAutoplay = backgroundAutoplay === 'true';
-
-          if (index >= 0 && index < tracks.length) {
-            currentTrackIndex = index;
-            shuffleEnabled = shouldShuffle;
-            shuffleButton.classList.toggle('active', shuffleEnabled);
-            if (shuffleEnabled) {
-              shuffleButton.style.color = 'var(--shuffle-button-active-color)';
-            } else {
-              shuffleButton.style.color = 'var(--shuffle-button-color)';
-            }
-            autoplayEnabled = shouldAutoplay;
-            autoplayToggle.classList.toggle('active', autoplayEnabled);
-
-            const card = allMusicCards[currentTrackIndex];
-            if (card) {
-              const audio = card.querySelector('audio');
-              if (currentAudio && currentAudio !== audio) {
-                currentAudio.pause();
-              }
-              currentAudio = audio;
-              currentAudio.play().catch(error => {
-                console.error("Error resuming playback:", error);
-              });
-              nowPlaying.style.display = 'flex';
-              updateNowPlayingInfo(tracks[currentTrackIndex].title, tracks[currentTrackIndex].thumbnail);
-              playPauseControl.innerHTML = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z"/></svg>';
-              updatePlayIcon(card, true);
-
-              // Remove background info
-              localStorage.removeItem('backgroundPlayback');
-              localStorage.removeItem('backgroundTrackIndex');
-              localStorage.removeItem('backgroundCurrentTime');
-              localStorage.removeItem('backgroundShuffle');
-              localStorage.removeItem('backgroundAutoplay');
-            }
-          }
-        }
-      }
-    });
   </script>
 </body>
 </html>
