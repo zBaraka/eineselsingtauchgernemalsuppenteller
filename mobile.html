@@ -20,12 +20,12 @@
 
     body {
       margin: 0;
-      padding: 0; 
+      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      max-width: 450px; 
+      max-width: 450px;
       margin: 0 auto;
       background-color: var(--background-color);
       color: var(--text-color);
@@ -38,7 +38,7 @@
       padding: 30px;
       width: 100%;
       max-width: 450px;
-      display: flex; 
+      display: flex;
       flex-direction: column;
       align-items: center;
       touch-action: pan-y pinch-zoom;
@@ -150,7 +150,7 @@
       border-radius: 50%;
       border: none;
       transition: background 0.3s ease;
-      margin-top: -5px; 
+      margin-top: -5px;
     }
 
     input[type="range"]::-moz-range-thumb {
@@ -161,7 +161,7 @@
       border-radius: 50%;
       border: none;
       transition: background 0.3s ease;
-      margin-top: 0; 
+      margin-top: 0;
     }
 
     input[type="range"]::-webkit-slider-runnable-track {
@@ -212,7 +212,7 @@
       list-style: none;
       padding: 0;
       margin: 0;
-      max-height: 150px; 
+      max-height: 150px;
       overflow-y: auto;
       width: 100%;
     }
@@ -254,11 +254,11 @@
       body {
         max-width: 100%;
       }
-      
+
       .player-container {
         width: 95%;
         padding: 20px;
-        align-items: center; 
+        align-items: center;
       }
 
       .controls {
@@ -337,7 +337,7 @@
     <div class="controls">
       <button id="prev-btn" title="Vorheriges Lied"><i class="fas fa-step-backward"></i></button>
       <button id="play-pause-btn" title="Play/Pause"><i class="fas fa-play"></i></button>
-      <button id="next-btn" title="N&#xe4;chstes Lied"><i class="fas fa-step-forward"></i></button>
+      <button id="next-btn" title="Nächstes Lied"><i class="fas fa-step-forward"></i></button>
       <button id="shuffle-btn" class="shuffle-btn" title="Shuffle"><i class="fas fa-random"></i></button>
       <button id="repeat-btn" class="repeat-btn" title="Repeat"><i class="fas fa-redo"></i></button>
       <button id="autoplay-btn" class="autoplay-btn" title="Autoplay"><i class="fas fa-infinity"></i></button>
@@ -546,6 +546,7 @@ const progress = document.getElementById('progress');
 const songListContainer = document.getElementById('song-list');
 const searchInput = document.getElementById('search-input');
 const playerContainer = document.querySelector('.player-container');
+
 function loadSong(index) {
   const song = songs[index];
   thumbnail.src = song.thumbnail;
@@ -555,28 +556,41 @@ function loadSong(index) {
   progress.value = 0;
   progress.style.setProperty('--progress', '0%');
   highlightActiveSong();
+  updateMediaSessionMetadata();
   audio.pause();
 }
+
 function playPause() {
   if (audio.paused) {
     audio.play();
     const playIcon = playPauseBtn.firstElementChild;
     playIcon.classList.remove('fa-play');
     playIcon.classList.add('fa-pause');
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = 'playing';
+    }
   } else {
     audio.pause();
     const playIcon = playPauseBtn.firstElementChild;
     playIcon.classList.remove('fa-pause');
     playIcon.classList.add('fa-play');
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = 'paused';
+    }
   }
 }
+
 function playSong(index) {
   currentSongIndex = index;
   loadSong(currentSongIndex);
   audio.play();
   playPauseBtn.querySelector('i').classList.remove('fa-play');
   playPauseBtn.querySelector('i').classList.add('fa-pause');
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.playbackState = 'playing';
+  }
 }
+
 function nextSong() {
   if (isShuffle) {
     shuffleIndex = (shuffleIndex + 1) % shuffledIndices.length;
@@ -589,7 +603,11 @@ function nextSong() {
   const playIcon = playPauseBtn.firstElementChild;
   playIcon.classList.remove('fa-play');
   playIcon.classList.add('fa-pause');
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.playbackState = 'playing';
+  }
 }
+
 function prevSong() {
   if (isShuffle) {
     shuffleIndex = (shuffleIndex - 1 + shuffledIndices.length) % shuffledIndices.length;
@@ -602,7 +620,11 @@ function prevSong() {
   const playIcon = playPauseBtn.firstElementChild;
   playIcon.classList.remove('fa-play');
   playIcon.classList.add('fa-pause');
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.playbackState = 'playing';
+  }
 }
+
 function toggleShuffle() {
   isShuffle = !isShuffle;
   shuffleBtn.querySelector('i').classList.toggle('active-control');
@@ -615,13 +637,15 @@ function toggleShuffle() {
     shuffleIndex = shuffledIndices.indexOf(currentSongIndex);
   }
 }
+
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+        [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
 }
+
 function toggleRepeat() {
   isRepeat = !isRepeat;
   repeatBtn.querySelector('i').classList.toggle('active-control');
@@ -632,6 +656,7 @@ function toggleRepeat() {
     autoplayBtn.querySelector('i').classList.remove('active-control');
   }
 }
+
 function toggleAutoplay() {
   isAutoplay = !isAutoplay;
   autoplayBtn.querySelector('i').classList.toggle('active-control');
@@ -642,16 +667,18 @@ function toggleAutoplay() {
     shuffleBtn.querySelector('i').classList.remove('active-control');
   }
 }
+
 playPauseBtn.addEventListener('click', playPause);
 prevBtn.addEventListener('click', prevSong);
 nextBtn.addEventListener('click', nextSong);
 shuffleBtn.addEventListener('click', toggleShuffle);
 repeatBtn.addEventListener('click', toggleRepeat);
 autoplayBtn.addEventListener('click', toggleAutoplay);
+
 audio.addEventListener('ended', () => {
   if (isRepeat) {
     audio.currentTime = 0;
-    audio.play();
+    audio.play().catch(error => console.error("Autoplay prevented (repeat): ", error));
   } else if (isAutoplay) {
     nextSong();
   } else if (isShuffle) {
@@ -660,8 +687,12 @@ audio.addEventListener('ended', () => {
     const playIcon = playPauseBtn.firstElementChild;
     playIcon.classList.remove('fa-pause');
     playIcon.classList.add('fa-play');
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = 'paused';
+    }
   }
 });
+
 audio.addEventListener('timeupdate', () => {
   if (isFinite(audio.duration)) {
     const progressValue = audio.currentTime / audio.duration * 100;
@@ -669,6 +700,7 @@ audio.addEventListener('timeupdate', () => {
     progress.style.setProperty('--progress', `${progressValue}%`);
   }
 });
+
 progress.addEventListener('input', () => {
   if (isFinite(audio.duration)) {
     const progressValue = progress.value;
@@ -676,15 +708,19 @@ progress.addEventListener('input', () => {
     progress.style.setProperty('--progress', `${progressValue}%`);
   }
 });
+
 let touchStartX = 0;
 let touchEndX = 0;
+
 playerContainer.addEventListener('touchstart', e => {
   touchStartX = e.touches[0].clientX;
 });
+
 playerContainer.addEventListener('touchend', e => {
   touchEndX = e.changedTouches[0].clientX;
   handleSwipe();
 });
+
 function handleSwipe() {
   const swipeDistance = touchEndX - touchStartX;
   if (swipeDistance > 50) {
@@ -693,14 +729,17 @@ function handleSwipe() {
     nextSong();
   }
 }
+
 const meta = document.createElement('meta');
 meta.name = 'viewport';
 meta.content = 'width=device-width, initial-scale=1.0';
 document.head.appendChild(meta);
+
 const backgroundMeta = document.createElement('meta');
 backgroundMeta.name = 'mobile-web-app-capable';
 backgroundMeta.content = 'yes';
 document.head.appendChild(backgroundMeta);
+
 function renderSongList(filteredSongs) {
   songListContainer.innerHTML = '';
   filteredSongs.forEach((song, index) => {
@@ -719,6 +758,7 @@ function renderSongList(filteredSongs) {
   });
   highlightActiveSong();
 }
+
 function highlightActiveSong() {
   const items = document.querySelectorAll('.song-item');
   items.forEach((item, index) => {
@@ -729,13 +769,49 @@ function highlightActiveSong() {
     }
   });
 }
+
 searchInput.addEventListener('input', () => {
   const query = searchInput.value.toLowerCase();
   const filteredSongs = songs.filter(song => song.title.toLowerCase().includes(query));
   renderSongList(filteredSongs);
 });
+
+function updateMediaSessionMetadata() {
+  if ('mediaSession' in navigator) {
+    const currentSong = songs[currentSongIndex];
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: currentSong.title,
+      artist: 'Various Artists', // Könnte man dynamisch anpassen, falls vorhanden
+      artwork: [
+        { src: currentSong.thumbnail, sizes: '96x96', type: 'image/png' },
+        { src: currentSong.thumbnail, sizes: '128x128', type: 'image/png' },
+        { src: currentSong.thumbnail, sizes: '192x192', type: 'image/png' },
+        { src: currentSong.thumbnail, sizes: '256x256', type: 'image/png' },
+        { src: currentSong.thumbnail, sizes: '384x384', type: 'image/png' },
+        { src: currentSong.thumbnail, sizes: '512x512', type: 'image/png' },
+      ]
+    });
+  }
+}
+
+if ('mediaSession' in navigator) {
+  navigator.mediaSession.setActionHandler('play', () => {
+    playPause();
+  });
+  navigator.mediaSession.setActionHandler('pause', () => {
+    playPause();
+  });
+  navigator.mediaSession.setActionHandler('nexttrack', () => {
+    nextSong();
+  });
+  navigator.mediaSession.setActionHandler('previoustrack', () => {
+    prevSong();
+  });
+}
+
 renderSongList(songs);
 loadSong(currentSongIndex);
+
 const playIcon = playPauseBtn.firstElementChild;
 playIcon.classList.remove('fa-pause');
 playIcon.classList.add('fa-play');
