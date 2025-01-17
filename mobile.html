@@ -781,7 +781,7 @@ function updateMediaSessionMetadata() {
     const currentSong = songs[currentSongIndex];
     navigator.mediaSession.metadata = new MediaMetadata({
       title: currentSong.title,
-      artist: 'Various Artists', // Könnte man dynamisch anpassen, falls vorhanden
+      artist: 'Skybrute', // Könnte man dynamisch anpassen, falls vorhanden
       artwork: [
         { src: currentSong.thumbnail, sizes: '96x96', type: 'image/png' },
         { src: currentSong.thumbnail, sizes: '128x128', type: 'image/png' },
