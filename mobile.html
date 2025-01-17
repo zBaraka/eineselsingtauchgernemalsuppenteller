@@ -1,0 +1,741 @@
+<html><head><base href="https://example.com/">
+  <title>Musik Player</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --background-color: #121212;
+      --player-background: #1e1e1e;
+      --text-color: #e0e0e0;
+      --accent-color: #ff4081;
+      --control-color: #e0e0e0;
+      --control-hover: #ff4081;
+      --slider-track: #333;
+      --slider-thumb: #ff4081;
+      --song-item-hover: #333;
+      --progress: 0%;
+    }
+
+    body {
+      margin: 0;
+      padding: 0; 
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      max-width: 450px; 
+      margin: 0 auto;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      overflow-x: hidden;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .player-container {
+      padding: 30px;
+      width: 100%;
+      max-width: 450px;
+      display: flex; 
+      flex-direction: column;
+      align-items: center;
+      touch-action: pan-y pinch-zoom;
+    }
+
+    .thumbnail-container {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      background-color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: border-radius 0.3s ease;
+    }
+
+    .thumbnail {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .thumbnail-container:hover .thumbnail {
+      transform: scale(1.05);
+    }
+
+    .song-info {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .song-title {
+      font-size: 1.5em;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: var(--accent-color);
+      transition: color 0.3s ease;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      background: none;
+      border: none;
+      font-size: 1.8em;
+      color: var(--control-color);
+      cursor: pointer;
+      transition: color 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      color: var(--control-hover);
+      transform: scale(1.2);
+    }
+
+    .shuffle-btn {
+      font-size: 1.5em;
+    }
+
+    .repeat-btn {
+      font-size: 1.5em;
+    }
+
+    .autoplay-btn {
+      font-size: 1.5em;
+    }
+
+    .controls button i {
+      font-size: 1.2em;
+      transition: transform 0.2s ease;
+    }
+
+    .controls button:hover i {
+      transform: scale(1.2);
+    }
+
+    .active-control {
+      color: var(--accent-color);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      background: linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) 0%, var(--slider-track) 0%, var(--slider-track) 100%);
+      border-radius: 3px;
+      outline: none;
+      margin-bottom: 20px;
+      transition: background 0.3s ease;
+      position: relative;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--slider-thumb);
+      cursor: pointer;
+      border-radius: 50%;
+      border: none;
+      transition: background 0.3s ease;
+      margin-top: -5px; 
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: var(--slider-thumb);
+      cursor: pointer;
+      border-radius: 50%;
+      border: none;
+      transition: background 0.3s ease;
+      margin-top: 0; 
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      background: linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) var(--progress), var(--slider-track) var(--progress), var(--slider-track) 100%);
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 6px;
+      background: linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) var(--progress), var(--slider-track) var(--progress), var(--slider-track) 100%);
+    }
+
+    .song-list-container {
+      margin-top: 25px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .song-list-container h3 {
+      margin-bottom: 10px;
+      color: var(--text-color);
+    }
+
+    .search-container {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .search-container input {
+      width: 100%;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      background-color: var(--player-background);
+      color: var(--text-color);
+      font-size: 1em;
+      outline: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .search-container input::placeholder {
+      color: #aaa;
+    }
+
+    .song-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 150px; 
+      overflow-y: auto;
+      width: 100%;
+    }
+
+    .song-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #444;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.3s ease;
+      color: var(--text-color);
+    }
+
+    .song-item img {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 5px;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    .song-item .song-name {
+      flex-grow: 1;
+      font-size: 1em;
+    }
+
+    .song-item:hover {
+      background-color: var(--song-item-hover);
+      color: var(--accent-color);
+    }
+
+    .song-item:last-child {
+      border-bottom: none;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        max-width: 100%;
+      }
+      
+      .player-container {
+        width: 95%;
+        padding: 20px;
+      }
+
+      .controls {
+        gap: 15px;
+      }
+
+      button {
+        font-size: 1.5em;
+      }
+
+      .shuffle-btn {
+        font-size: 1.2em;
+      }
+
+      .repeat-btn {
+        font-size: 1.2em;
+      }
+
+      .autoplay-btn {
+        font-size: 1.2em;
+      }
+
+      .song-title {
+        font-size: 1.2em;
+      }
+
+      input[type="range"] {
+        height: 5px;
+      }
+
+      input[type="range"]::-webkit-slider-thumb,
+      input[type="range"]::-moz-range-thumb {
+        width: 14px;
+        height: 14px;
+      }
+
+      input[type="range"]::-webkit-slider-runnable-track,
+      input[type="range"]::-moz-range-track {
+        height: 5px;
+      }
+
+      .song-list {
+        max-height: 180px;
+      }
+
+      .controls button i {
+        font-size: 1em;
+      }
+    }
+
+    /* Scrollbar Styling */
+    .song-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .song-list::-webkit-scrollbar-track {
+      background: #2c2c2c;
+    }
+
+    .song-list::-webkit-scrollbar-thumb {
+      background: var(--accent-color);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="player-container">
+    <div class="thumbnail-container">
+      <img id="thumbnail" class="thumbnail" src alt="Song Thumbnail">
+    </div>
+    <div class="song-info">
+      <div id="song-title" class="song-title"></div>
+    </div>
+    <audio id="audio" style="width: 100%;"></audio>
+    <input type="range" id="progress" value="0">
+    <div class="controls">
+      <button id="prev-btn" title="Vorheriges Lied"><i class="fas fa-step-backward"></i></button>
+      <button id="play-pause-btn" title="Play/Pause"><i class="fas fa-play"></i></button>
+      <button id="next-btn" title="N&#xe4;chstes Lied"><i class="fas fa-step-forward"></i></button>
+      <button id="shuffle-btn" class="shuffle-btn" title="Shuffle"><i class="fas fa-random"></i></button>
+      <button id="repeat-btn" class="repeat-btn" title="Repeat"><i class="fas fa-redo"></i></button>
+      <button id="autoplay-btn" class="autoplay-btn" title="Autoplay"><i class="fas fa-infinity"></i></button>
+    </div>
+    <div class="song-list-container">
+      <h3>Song Liste</h3>
+      <div class="search-container">
+        <input type="text" id="search-input" placeholder="Suche nach Songs...">
+      </div>
+      <ul class="song-list" id="song-list">
+      </ul>
+    </div>
+  </div>
+
+  <script>const songs = [{
+  title: 'Analfried Song',
+  thumbnail: 'https://i.imgur.com/rU8nXfL.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/analfried%20song.mp3'
+}, {
+  title: 'Ave Natale',
+  thumbnail: 'https://i.imgur.com/vnL2rRQ.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Ave Natale.mp3'
+}, {
+  title: 'Besgen im Haus',
+  thumbnail: 'https://i.imgur.com/LGY7Ugh.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Besgen_im_Haus.mp3'
+}, {
+  title: 'Beste im Biz',
+  thumbnail: 'https://i.imgur.com/eRufmDB.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Beste_im_Biz.mp3'
+}, {
+  title: 'Clyde gegen Rüdiger und Niko',
+  thumbnail: 'https://i.imgur.com/zaQVCSY.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Clyde_gegen_R_diger_und_Niko.mp3'
+}, {
+  title: 'Der Größte und Tollste',
+  thumbnail: 'https://i.imgur.com/G3MRTe1.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/größte und tollste.m4a'
+}, {
+  title: 'Deutschland GmbH',
+  thumbnail: 'https://i.imgur.com/JEGB6yf.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Deutschland_GmbH.mp3'
+}, {
+  title: 'Die Schule ist ein Witz',
+  thumbnail: 'https://i.imgur.com/A98pl0L.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Die_Schule_ist_ein_Witz.mp3'
+}, {
+  title: 'Disstrack gegen Berrewitz',
+  thumbnail: 'https://i.imgur.com/HOJbtsF.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Disstrack_gegen_Berrewitz.mp3'
+}, {
+  title: 'Disstrack gegen Besgen',
+  thumbnail: 'https://i.imgur.com/0lgqrve.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Disstrack gegen Besgen.mp3'
+}, {
+  title: 'Dual Shadows',
+  thumbnail: 'https://i.imgur.com/MVqqDkZ.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Dual_Shadows.mp3'
+}, {
+  title: 'Eclipsed Horizions',
+  thumbnail: 'https://i.imgur.com/IIqcUAP.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Eclipsed_Horizions.mp3'
+}, {
+  title: 'Fick die Schule',
+  thumbnail: 'https://i.imgur.com/AvyljGe.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Fick_die_Schule.mp3'
+}, {
+  title: 'Fisch an Land',
+  thumbnail: 'https://i.imgur.com/VyblhJC.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Fisch_an_Land.mp3'
+}, {
+  title: 'Granny Rap - In den alten Jahren',
+  thumbnail: 'https://i.imgur.com/qGC2chy.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Granny_Rap___In_den_alten_Jahren.mp3'
+}, {
+  title: 'Große Namen große Worte',
+  thumbnail: 'https://cdn2.suno.ai/cbe38b4f-45bc-46b6-89d2-f295497b98a5_e6de5789.jpeg',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Große Namen%2C große Worte.mp3'
+}, {
+  title: 'Hattig\'s Schäferhund',
+  thumbnail: 'https://i.imgur.com/i3D57cb.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Hattig_s_Sch_ferhund.mp3'
+}, {
+  title: 'Inferno',
+  thumbnail: 'https://i.imgur.com/0ONzAdK.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Inferno.mp3'
+}, {
+  title: 'Jüdisch ist normal',
+  thumbnail: 'https://i.imgur.com/phhCDUv.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/J_disch_ist_normal.mp3'
+}, {
+  title: 'Kein Limit',
+  thumbnail: 'https://cdn2.suno.ai/8cb3993b-df74-4171-80a6-cbee2eae2d0e_c9c50a12.jpeg',
+  path: 'https://cdn1.suno.ai/8cb3993b-df74-4171-80a6-cbee2eae2d0e.mp3'
+}, {
+  title: 'Kein Platz für Schwächlinge',
+  thumbnail: 'https://i.imgur.com/xpAQcEB.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Kein_Platz_f_r_Schw_chlinge.mp3'
+}, {
+  title: 'Last View',
+  thumbnail: 'https://i.imgur.com/oo5HheM.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Last_View.mp3'
+}, {
+  title: 'Mamadou Song',
+  thumbnail: 'https://cdn.discordapp.com/avatars/1278460402719657984/95ebbb1971361670a93f10d0fe49b246.png?size=1024&width=940&height=940',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Mamadou Song.mp3'
+}, {
+  title: 'Whispers of a broken heart',
+  thumbnail: 'https://i.imgur.com/PYkgDtl.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Whispers_of_a_broken_heart.mp3'
+}, {
+  title: 'Rüdiger Song',
+  thumbnail: 'https://i.imgur.com/jth0slY.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/R_diger_Song.mp3'
+}, {
+  title: 'Niko durch die Gänge',
+  thumbnail: 'https://cdn.discordapp.com/avatars/1278455593044148254/a_4e8372b72b160d18c49b0f4bc897e49e.gif?size=4096',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Niko%20durch%20die%20g%C3%A4nge.mp3'
+}, {
+  title: 'Rise Above',
+  thumbnail: 'https://i.imgur.com/TR7N0j2.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Rise_Above.mp3'
+}, {
+  title: 'Rise from the Ruins',
+  thumbnail: 'https://i.imgur.com/CbbUryc.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Rise_from_the_Ruins.mp3'
+}, {
+  title: 'Seck am Start',
+  thumbnail: 'https://i.imgur.com/9E90qRs.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Seck_am_Start.mp3'
+}, {
+  title: 'Soundclash Remix',
+  thumbnail: 'https://i.imgur.com/nVK3uhP.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Soundclash_Remix.mp3'
+}, {
+  title: 'Ihr Abschaum',
+  thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Ihr%20Abschaum.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Ihr%20Abschaum.mp3'
+}, {
+  title: 'Born in the Fire',
+  thumbnail: 'https://cdn2.suno.ai/image_large_32bcd2ed-b7cd-41b0-827c-8b8dba0e2465.jpeg',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Born in the Fire.mp3'
+}, {
+  title: 'Adi gegen Niko',
+  thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Adi%20gegen%20Niko.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Adi%20gegen%20Niko.mp3'
+}, {
+  title: 'Alles Mist',
+  thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Alles%20Mist.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Alles%20Mist.mp3'
+}, {
+  title: 'Das Winni Schwein',
+  thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Das%20Winni%20Schwein.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Das%20Winni%20Schwein.mp3'
+}, {
+  title: 'Du Wicht',
+  thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Du%20Wicht.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/HeyStan%20du%20wicht.mp3'
+}, {
+  title: 'Monster in der Hose',
+  thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Monster%20in%20der%20Hose.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Monster%20in%20der%20Hose.mp3'
+}, {
+  title: 'Ich bin ein Soziopath',
+  thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Mimon.jpg',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Ich%20bin%20ein%20Soziopath.mp3'
+}, {
+  title: 'Maximal Disziplin',
+  thumbnail: 'https://cdn2.suno.ai/41bbce05-de29-40b3-96c0-c3d365de1286_d1866cad.jpeg',
+  path: 'https://cdn1.suno.ai/41bbce05-de29-40b3-96c0-c3d365de1286.mp3'
+}, {
+  title: 'Analfried Frisst Niko',
+  thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Analfried%20frisst%20Niko.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Analfried%20frisst%20Niko.mp3'
+}, {
+  title: 'Wannabe Legends',
+  thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Wannabe%20Legends.webp',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Wannabe_Legends.mp3'
+}, {
+  title: 'Schmitzgame Song',
+  thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Schmitzgame%20Song.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@neogalaxis/Fixed_Schmitzgame.mp3'
+}, {
+  title: 'Oh Clyde',
+  thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Oh%20Clyde.png',
+  path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@neogalaxis/Oh%20Clyde.mp3'
+}];
+songs.sort((a, b) => a.title.localeCompare(b.title, 'de'));
+let currentSongIndex = 0;
+let isShuffle = false;
+let shuffledIndices = [];
+let shuffleIndex = 0;
+let isRepeat = false;
+let isAutoplay = false;
+const audio = document.getElementById('audio');
+audio.autoplay = false;
+const thumbnail = document.getElementById('thumbnail');
+const songTitle = document.getElementById('song-title');
+const playPauseBtn = document.getElementById('play-pause-btn');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+const shuffleBtn = document.getElementById('shuffle-btn');
+const repeatBtn = document.getElementById('repeat-btn');
+const autoplayBtn = document.getElementById('autoplay-btn');
+const progress = document.getElementById('progress');
+const songListContainer = document.getElementById('song-list');
+const searchInput = document.getElementById('search-input');
+const playerContainer = document.querySelector('.player-container');
+function loadSong(index) {
+  const song = songs[index];
+  thumbnail.src = song.thumbnail;
+  songTitle.textContent = song.title;
+  audio.src = song.path;
+  audio.load();
+  progress.value = 0;
+  progress.style.setProperty('--progress', '0%');
+  highlightActiveSong();
+  audio.pause();
+}
+function playPause() {
+  if (audio.paused) {
+    audio.play();
+    const playIcon = playPauseBtn.firstElementChild;
+    playIcon.classList.remove('fa-play');
+    playIcon.classList.add('fa-pause');
+  } else {
+    audio.pause();
+    const playIcon = playPauseBtn.firstElementChild;
+    playIcon.classList.remove('fa-pause');
+    playIcon.classList.add('fa-play');
+  }
+}
+function playSong(index) {
+  currentSongIndex = index;
+  loadSong(currentSongIndex);
+  audio.play();
+  playPauseBtn.querySelector('i').classList.remove('fa-play');
+  playPauseBtn.querySelector('i').classList.add('fa-pause');
+}
+function nextSong() {
+  if (isShuffle) {
+    shuffleIndex = (shuffleIndex + 1) % shuffledIndices.length;
+    currentSongIndex = shuffledIndices[shuffleIndex];
+  } else {
+    currentSongIndex = (currentSongIndex + 1) % songs.length;
+  }
+  loadSong(currentSongIndex);
+  audio.play();
+  const playIcon = playPauseBtn.firstElementChild;
+  playIcon.classList.remove('fa-play');
+  playIcon.classList.add('fa-pause');
+}
+function prevSong() {
+  if (isShuffle) {
+    shuffleIndex = (shuffleIndex - 1 + shuffledIndices.length) % shuffledIndices.length;
+    currentSongIndex = shuffledIndices[shuffleIndex];
+  } else {
+    currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+  }
+  loadSong(currentSongIndex);
+  audio.play();
+  const playIcon = playPauseBtn.firstElementChild;
+  playIcon.classList.remove('fa-play');
+  playIcon.classList.add('fa-pause');
+}
+function toggleShuffle() {
+  isShuffle = !isShuffle;
+  shuffleBtn.querySelector('i').classList.toggle('active-control');
+  if (isShuffle) {
+    isRepeat = false;
+    isAutoplay = false;
+    repeatBtn.querySelector('i').classList.remove('active-control');
+    autoplayBtn.querySelector('i').classList.remove('active-control');
+    shuffledIndices = shuffleArray([...Array(songs.length).keys()]);
+    shuffleIndex = shuffledIndices.indexOf(currentSongIndex);
+  }
+}
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+function toggleRepeat() {
+  isRepeat = !isRepeat;
+  repeatBtn.querySelector('i').classList.toggle('active-control');
+  if (isRepeat) {
+    isShuffle = false;
+    isAutoplay = false;
+    shuffleBtn.querySelector('i').classList.remove('active-control');
+    autoplayBtn.querySelector('i').classList.remove('active-control');
+  }
+}
+function toggleAutoplay() {
+  isAutoplay = !isAutoplay;
+  autoplayBtn.querySelector('i').classList.toggle('active-control');
+  if (isAutoplay) {
+    isRepeat = false;
+    isShuffle = false;
+    repeatBtn.querySelector('i').classList.remove('active-control');
+    shuffleBtn.querySelector('i').classList.remove('active-control');
+  }
+}
+playPauseBtn.addEventListener('click', playPause);
+prevBtn.addEventListener('click', prevSong);
+nextBtn.addEventListener('click', nextSong);
+shuffleBtn.addEventListener('click', toggleShuffle);
+repeatBtn.addEventListener('click', toggleRepeat);
+autoplayBtn.addEventListener('click', toggleAutoplay);
+audio.addEventListener('ended', () => {
+  if (isRepeat) {
+    audio.currentTime = 0;
+    audio.play();
+  } else if (isAutoplay) {
+    nextSong();
+  } else if (isShuffle) {
+    nextSong();
+  } else {
+    const playIcon = playPauseBtn.firstElementChild;
+    playIcon.classList.remove('fa-pause');
+    playIcon.classList.add('fa-play');
+  }
+});
+audio.addEventListener('timeupdate', () => {
+  if (isFinite(audio.duration)) {
+    const progressValue = audio.currentTime / audio.duration * 100;
+    progress.value = progressValue;
+    progress.style.setProperty('--progress', `${progressValue}%`);
+  }
+});
+progress.addEventListener('input', () => {
+  if (isFinite(audio.duration)) {
+    const progressValue = progress.value;
+    audio.currentTime = progressValue / 100 * audio.duration;
+    progress.style.setProperty('--progress', `${progressValue}%`);
+  }
+});
+let touchStartX = 0;
+let touchEndX = 0;
+playerContainer.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+});
+playerContainer.addEventListener('touchend', e => {
+  touchEndX = e.changedTouches[0].clientX;
+  handleSwipe();
+});
+function handleSwipe() {
+  const swipeDistance = touchEndX - touchStartX;
+  if (swipeDistance > 50) {
+    prevSong();
+  } else if (swipeDistance < -50) {
+    nextSong();
+  }
+}
+const meta = document.createElement('meta');
+meta.name = 'viewport';
+meta.content = 'width=device-width, initial-scale=1.0';
+document.head.appendChild(meta);
+const backgroundMeta = document.createElement('meta');
+backgroundMeta.name = 'mobile-web-app-capable';
+backgroundMeta.content = 'yes';
+document.head.appendChild(backgroundMeta);
+function renderSongList(filteredSongs) {
+  songListContainer.innerHTML = '';
+  filteredSongs.forEach((song, index) => {
+    const listItem = document.createElement('li');
+    listItem.classList.add('song-item');
+    const img = document.createElement('img');
+    img.src = song.thumbnail;
+    img.alt = `${song.title} Thumbnail`;
+    const songName = document.createElement('span');
+    songName.classList.add('song-name');
+    songName.textContent = song.title;
+    listItem.appendChild(img);
+    listItem.appendChild(songName);
+    listItem.addEventListener('click', () => playSong(index));
+    songListContainer.appendChild(listItem);
+  });
+  highlightActiveSong();
+}
+function highlightActiveSong() {
+  const items = document.querySelectorAll('.song-item');
+  items.forEach((item, index) => {
+    if (index === currentSongIndex) {
+      item.style.color = 'var(--accent-color)';
+    } else {
+      item.style.color = 'var(--text-color)';
+    }
+  });
+}
+searchInput.addEventListener('input', () => {
+  const query = searchInput.value.toLowerCase();
+  const filteredSongs = songs.filter(song => song.title.toLowerCase().includes(query));
+  renderSongList(filteredSongs);
+});
+renderSongList(songs);
+loadSong(currentSongIndex);
+const playIcon = playPauseBtn.firstElementChild;
+playIcon.classList.remove('fa-pause');
+playIcon.classList.add('fa-play');
+</script>
+</body>
+</html>
