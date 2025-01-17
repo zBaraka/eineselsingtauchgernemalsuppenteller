@@ -1,6 +1,8 @@
-<head><base href="www.skybrute.de">
-<link rel="icon" href="https://i.imgur.com/JP4qYpv.png">
+<html><head><base href="https://www.skybrute.de">
+  <link rel="icon" href="https://i.imgur.com/JP4qYpv.png">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>Skybrute</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;display=swap" rel="stylesheet">
@@ -322,6 +324,10 @@
       background: var(--accent-color);
       border-radius: 4px;
     }
+    
+    audio {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -332,12 +338,12 @@
     <div class="song-info">
       <div id="song-title" class="song-title"></div>
     </div>
-    <audio id="audio" style="width: 100%;"></audio>
+    <audio id="audio" style="width: 100%;" controls></audio>
     <input type="range" id="progress" value="0">
     <div class="controls">
       <button id="prev-btn" title="Vorheriges Lied"><i class="fas fa-step-backward"></i></button>
       <button id="play-pause-btn" title="Play/Pause"><i class="fas fa-play"></i></button>
-      <button id="next-btn" title="Nächstes Lied"><i class="fas fa-step-forward"></i></button>
+      <button id="next-btn" title="N&#xe4;chstes Lied"><i class="fas fa-step-forward"></i></button>
       <button id="shuffle-btn" class="shuffle-btn" title="Shuffle"><i class="fas fa-random"></i></button>
       <button id="repeat-btn" class="repeat-btn" title="Repeat"><i class="fas fa-redo"></i></button>
       <button id="autoplay-btn" class="autoplay-btn" title="Autoplay"><i class="fas fa-infinity"></i></button>
@@ -534,6 +540,13 @@ let isRepeat = false;
 let isAutoplay = false;
 const audio = document.getElementById('audio');
 audio.autoplay = false;
+audio.preload = 'auto';
+audio.loop = false;
+audio.controls = false;
+audio.autoplay = false;
+audio.preload = 'auto';
+audio.loop = false;
+audio.controls = true;
 const thumbnail = document.getElementById('thumbnail');
 const songTitle = document.getElementById('song-title');
 const playPauseBtn = document.getElementById('play-pause-btn');
@@ -546,7 +559,6 @@ const progress = document.getElementById('progress');
 const songListContainer = document.getElementById('song-list');
 const searchInput = document.getElementById('search-input');
 const playerContainer = document.querySelector('.player-container');
-
 function loadSong(index) {
   const song = songs[index];
   thumbnail.src = song.thumbnail;
@@ -558,11 +570,11 @@ function loadSong(index) {
   highlightActiveSong();
   updateMediaSessionMetadata();
   audio.pause();
+  updatePlayPauseIcon();
 }
-
 function playPause() {
   if (audio.paused) {
-    audio.play();
+    audio.play().catch(error => console.error("Autoplay prevented: ", error));
     const playIcon = playPauseBtn.firstElementChild;
     playIcon.classList.remove('fa-play');
     playIcon.classList.add('fa-pause');
@@ -579,18 +591,25 @@ function playPause() {
     }
   }
 }
-
+function updatePlayPauseIcon() {
+  const playIcon = playPauseBtn.firstElementChild;
+  if (audio.paused) {
+    playIcon.classList.remove('fa-pause');
+    playIcon.classList.add('fa-play');
+  } else {
+    playIcon.classList.remove('fa-play');
+    playIcon.classList.add('fa-pause');
+  }
+}
 function playSong(index) {
   currentSongIndex = index;
   loadSong(currentSongIndex);
-  audio.play();
-  playPauseBtn.querySelector('i').classList.remove('fa-play');
-  playPauseBtn.querySelector('i').classList.add('fa-pause');
+  audio.play().catch(error => console.error("Autoplay prevented: ", error));
+  updatePlayPauseIcon();
   if ('mediaSession' in navigator) {
     navigator.mediaSession.playbackState = 'playing';
   }
 }
-
 function nextSong() {
   if (isShuffle) {
     shuffleIndex = (shuffleIndex + 1) % shuffledIndices.length;
@@ -599,15 +618,12 @@ function nextSong() {
     currentSongIndex = (currentSongIndex + 1) % songs.length;
   }
   loadSong(currentSongIndex);
-  audio.play();
-  const playIcon = playPauseBtn.firstElementChild;
-  playIcon.classList.remove('fa-play');
-  playIcon.classList.add('fa-pause');
+  audio.play().catch(error => console.error("Autoplay prevented: ", error));
+  updatePlayPauseIcon();
   if ('mediaSession' in navigator) {
     navigator.mediaSession.playbackState = 'playing';
   }
 }
-
 function prevSong() {
   if (isShuffle) {
     shuffleIndex = (shuffleIndex - 1 + shuffledIndices.length) % shuffledIndices.length;
@@ -616,15 +632,12 @@ function prevSong() {
     currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
   }
   loadSong(currentSongIndex);
-  audio.play();
-  const playIcon = playPauseBtn.firstElementChild;
-  playIcon.classList.remove('fa-play');
-  playIcon.classList.add('fa-pause');
+  audio.play().catch(error => console.error("Autoplay prevented: ", error));
+  updatePlayPauseIcon();
   if ('mediaSession' in navigator) {
     navigator.mediaSession.playbackState = 'playing';
   }
 }
-
 function toggleShuffle() {
   isShuffle = !isShuffle;
   shuffleBtn.querySelector('i').classList.toggle('active-control');
@@ -637,15 +650,13 @@ function toggleShuffle() {
     shuffleIndex = shuffledIndices.indexOf(currentSongIndex);
   }
 }
-
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+    [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
 }
-
 function toggleRepeat() {
   isRepeat = !isRepeat;
   repeatBtn.querySelector('i').classList.toggle('active-control');
@@ -656,7 +667,6 @@ function toggleRepeat() {
     autoplayBtn.querySelector('i').classList.remove('active-control');
   }
 }
-
 function toggleAutoplay() {
   isAutoplay = !isAutoplay;
   autoplayBtn.querySelector('i').classList.toggle('active-control');
@@ -667,14 +677,12 @@ function toggleAutoplay() {
     shuffleBtn.querySelector('i').classList.remove('active-control');
   }
 }
-
 playPauseBtn.addEventListener('click', playPause);
 prevBtn.addEventListener('click', prevSong);
 nextBtn.addEventListener('click', nextSong);
 shuffleBtn.addEventListener('click', toggleShuffle);
 repeatBtn.addEventListener('click', toggleRepeat);
 autoplayBtn.addEventListener('click', toggleAutoplay);
-
 audio.addEventListener('ended', () => {
   if (isRepeat) {
     audio.currentTime = 0;
@@ -684,15 +692,12 @@ audio.addEventListener('ended', () => {
   } else if (isShuffle) {
     nextSong();
   } else {
-    const playIcon = playPauseBtn.firstElementChild;
-    playIcon.classList.remove('fa-pause');
-    playIcon.classList.add('fa-play');
+    updatePlayPauseIcon();
     if ('mediaSession' in navigator) {
       navigator.mediaSession.playbackState = 'paused';
     }
   }
 });
-
 audio.addEventListener('timeupdate', () => {
   if (isFinite(audio.duration)) {
     const progressValue = audio.currentTime / audio.duration * 100;
@@ -700,7 +705,6 @@ audio.addEventListener('timeupdate', () => {
     progress.style.setProperty('--progress', `${progressValue}%`);
   }
 });
-
 progress.addEventListener('input', () => {
   if (isFinite(audio.duration)) {
     const progressValue = progress.value;
@@ -708,19 +712,15 @@ progress.addEventListener('input', () => {
     progress.style.setProperty('--progress', `${progressValue}%`);
   }
 });
-
 let touchStartX = 0;
 let touchEndX = 0;
-
 playerContainer.addEventListener('touchstart', e => {
   touchStartX = e.touches[0].clientX;
 });
-
 playerContainer.addEventListener('touchend', e => {
   touchEndX = e.changedTouches[0].clientX;
   handleSwipe();
 });
-
 function handleSwipe() {
   const swipeDistance = touchEndX - touchStartX;
   if (swipeDistance > 50) {
@@ -729,17 +729,6 @@ function handleSwipe() {
     nextSong();
   }
 }
-
-const meta = document.createElement('meta');
-meta.name = 'viewport';
-meta.content = 'width=device-width, initial-scale=1.0';
-document.head.appendChild(meta);
-
-const backgroundMeta = document.createElement('meta');
-backgroundMeta.name = 'mobile-web-app-capable';
-backgroundMeta.content = 'yes';
-document.head.appendChild(backgroundMeta);
-
 function renderSongList(filteredSongs) {
   songListContainer.innerHTML = '';
   filteredSongs.forEach((song, index) => {
@@ -758,7 +747,6 @@ function renderSongList(filteredSongs) {
   });
   highlightActiveSong();
 }
-
 function highlightActiveSong() {
   const items = document.querySelectorAll('.song-item');
   items.forEach((item, index) => {
@@ -769,52 +757,67 @@ function highlightActiveSong() {
     }
   });
 }
-
 searchInput.addEventListener('input', () => {
   const query = searchInput.value.toLowerCase();
   const filteredSongs = songs.filter(song => song.title.toLowerCase().includes(query));
   renderSongList(filteredSongs);
 });
-
 function updateMediaSessionMetadata() {
+  const currentSong = songs[currentSongIndex];
   if ('mediaSession' in navigator) {
-    const currentSong = songs[currentSongIndex];
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: currentSong.title,
-      artist: 'Skybrute', // Könnte man dynamisch anpassen, falls vorhanden
-      artwork: [
-        { src: currentSong.thumbnail, sizes: '96x96', type: 'image/png' },
-        { src: currentSong.thumbnail, sizes: '128x128', type: 'image/png' },
-        { src: currentSong.thumbnail, sizes: '192x192', type: 'image/png' },
-        { src: currentSong.thumbnail, sizes: '256x256', type: 'image/png' },
-        { src: currentSong.thumbnail, sizes: '384x384', type: 'image/png' },
-        { src: currentSong.thumbnail, sizes: '512x512', type: 'image/png' },
-      ]
-    });
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentSong.title,
+        artist: 'Skybrute',
+        artwork: [{
+          src: currentSong.thumbnail,
+          sizes: '96x96',
+          type: 'image/png'
+        }, {
+          src: currentSong.thumbnail,
+          sizes: '128x128',
+          type: 'image/png'
+        }, {
+          src: currentSong.thumbnail,
+          sizes: '192x192',
+          type: 'image/png'
+        }, {
+          src: currentSong.thumbnail,
+          sizes: '256x256',
+          type: 'image/png'
+        }, {
+          src: currentSong.thumbnail,
+          sizes: '384x384',
+          type: 'image/png'
+        }, {
+          src: currentSong.thumbnail,
+          sizes: '512x512',
+          type: 'image/png'
+        }]
+      });
+      navigator.mediaSession.setActionHandler('play', playPause);
+      navigator.mediaSession.setActionHandler('pause', playPause);
+      navigator.mediaSession.setActionHandler('nexttrack', nextSong);
+      navigator.mediaSession.setActionHandler('previoustrack', prevSong);
+    } catch (error) {
+      console.error('Media Session API failed:', error);
+    }
   }
 }
-
-if ('mediaSession' in navigator) {
-  navigator.mediaSession.setActionHandler('play', () => {
-    playPause();
-  });
-  navigator.mediaSession.setActionHandler('pause', () => {
-    playPause();
-  });
-  navigator.mediaSession.setActionHandler('nexttrack', () => {
-    nextSong();
-  });
-  navigator.mediaSession.setActionHandler('previoustrack', () => {
-    prevSong();
-  });
+function initialize() {
+  renderSongList(songs);
+  loadSong(currentSongIndex);
+  audio.pause();
+  updatePlayPauseIcon();
 }
-
-renderSongList(songs);
-loadSong(currentSongIndex);
-
-const playIcon = playPauseBtn.firstElementChild;
-playIcon.classList.remove('fa-pause');
-playIcon.classList.add('fa-play');
-</script>
+initialize();
+window.addEventListener('load', () => {
+  updatePlayPauseIcon();
+});
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    updateMediaSessionMetadata();
+  }
+});</script>
 </body>
 </html>
