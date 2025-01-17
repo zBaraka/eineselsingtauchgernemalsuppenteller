@@ -1,4 +1,4 @@
-<head><base href="www.skybrute.de">
+<html><head><base href="www.skybrute.de">
 <link rel="icon" href="https://i.imgur.com/JP4qYpv.png">
   <meta charset="UTF-8">
   <title>Skybrute</title>
@@ -515,6 +515,13 @@
       thumbnailContainer.innerHTML = thumbnailSrc ? `<img src="${thumbnailSrc}" alt="${title}">` : `<svg viewBox="0 0 24 24">
                  <path fill="currentColor" d="M12,3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
                </svg>`;
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: title,
+          artist: 'Skybrute', 
+          artwork: thumbnailSrc ? [{ src: thumbnailSrc }] : []
+        });
+      }
     }
     function createMusicCard(song, index) {
       const card = document.createElement('div');
@@ -1039,7 +1046,51 @@
       });
     }
 
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('play', () => {
+        if (currentAudio) {
+          currentAudio.play();
+          playPauseControl.innerHTML = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z"/></svg>';
+          updatePlayIcon(currentAudio.closest('.music-card'), true);
+        }
+      });
 
+      navigator.mediaSession.setActionHandler('pause', () => {
+        if (currentAudio) {
+          currentAudio.pause();
+          playPauseControl.innerHTML = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z"/></svg>';
+          updatePlayIcon(currentAudio.closest('.music-card'), false);
+        }
+      });
+
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        playPrevTrack();
+      });
+
+      navigator.mediaSession.setActionHandler('nexttrack', () => {
+        playNextTrack();
+      });
+
+      navigator.mediaSession.setActionHandler('seekbackward', (event) => {
+        if (currentAudio) {
+          const seekTime = currentAudio.currentTime - (event.seekOffset || 10);
+          currentAudio.currentTime = Math.max(0, seekTime);
+        }
+      });
+
+      navigator.mediaSession.setActionHandler('seekforward', (event) => {
+        if (currentAudio) {
+          const seekTime = currentAudio.currentTime + (event.seekOffset || 10);
+          currentAudio.currentTime = Math.min(currentAudio.duration, seekTime);
+        }
+      });
+
+      navigator.mediaSession.setActionHandler('seekto', (event) => {
+        if (currentAudio && event.seekTime !== undefined) {
+          currentAudio.currentTime = event.seekTime;
+        }
+      });
+    }
   </script>
 </body>
 </html>
