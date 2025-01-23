@@ -597,11 +597,10 @@ function createMusicCard(song, index) {
     currentAudio.volume = parseFloat(volumeSlider.value);
   });
   audio.addEventListener('ended', () => {
+    const wasPlayingCard = audio.closest('.music-card');
+    updatePlayIcon(wasPlayingCard, false);
     if (playbackModes.current !== 'none') {
       playNextTrack();
-    } else {
-      playPauseControl.innerHTML = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z"/></svg>';
-      updatePlayIcon(currentAudio.closest('.music-card'), false);
     }
   });
   audio.addEventListener('timeupdate', () => {
@@ -615,12 +614,20 @@ function createMusicCard(song, index) {
   return card;
 }
 function updatePlayIcon(card, isPlaying) {
+  if (!card) return;
   const playIcon = card.querySelector('.play-icon');
   if (isPlaying) {
     playIcon.innerHTML = '<path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z"/>';
   } else {
     playIcon.innerHTML = '<path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z"/>';
   }
+}
+function updateAllPlayIcons(exceptCard = null) {
+  allMusicCards.forEach(card => {
+    if (card !== exceptCard) {
+      updatePlayIcon(card, false);
+    }
+  });
 }
 searchInput.addEventListener('input', e => {
   filterSongs(e.target.value);
@@ -686,17 +693,20 @@ function updateModeIndicators() {
   }
 }
 function playNextTrack() {
+  updateAllPlayIcons();
   if (tracks.length === 0) return;
   const newIndex = playbackModes.current === 'none' ? (currentTrackIndex + 1) % tracks.length : getNextTrackIndex();
   if (newIndex === currentTrackIndex) return;
   currentTrackIndex = newIndex;
   const nextCard = allMusicCards[currentTrackIndex];
   const audio = nextCard?.querySelector('audio');
+  if (currentAudio) {
+    const previousCard = currentAudio.closest('.music-card');
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    updatePlayIcon(previousCard, false);
+  }
   if (audio) {
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio.currentTime = 0;
-    }
     audio.volume = parseFloat(volumeSlider.value);
     audio.play().catch(console.error);
     currentAudio = audio;
@@ -706,7 +716,14 @@ function playNextTrack() {
   }
 }
 function playPrevTrack() {
+  updateAllPlayIcons();
   if (tracks.length === 0) return;
+  if (currentAudio) {
+    const previousCard = currentAudio.closest('.music-card');
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    updatePlayIcon(previousCard, false);
+  }
   currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
   const prevCard = allMusicCards[currentTrackIndex];
   if (prevCard) {
