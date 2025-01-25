@@ -20,6 +20,7 @@
       --progress-handle-color: #777;
       --shuffle-button-color: #ffffff;
       --shuffle-button-active-color: var(--accent-color);
+      --loop-button-active-color: #ff4081; 
     }
     * {
       margin: 0;
@@ -289,6 +290,14 @@
       color: var(--secondary-color);
       background-color: rgba(3, 218, 198, 0.1);
     }
+    .loop-button.active {
+      color: var(--loop-button-active-color);
+      box-shadow: 0 0 0 2px var(--loop-button-active-color);
+    }
+    .loop-button:hover:not(.active) {
+      color: var(--loop-button-active-color);
+      background-color: rgba(255, 64, 129, 0.1); 
+    }
     .control-circle {
       background: var(--card-background);
       border: none;
@@ -439,6 +448,12 @@
         <path fill="currentColor" d="M17,3L22.25,7.5L17,12L22.25,16.5L17,21V18H14.26L11.44,15.18L13.56,13.06L15.5,15H17V12L17,9H15.5L6.5,18H2V15H5.26L14.26,6H17V3M2,6H6.5L9.32,8.82L7.2,10.94L5.26,9H2V6Z"/>
       </svg>
     </button>
+    <button class="control-circle loop-button" id="loop-button" aria-label="Loop Track">
+        <svg viewBox="0 0 24 24">
+          <path fill="currentColor" d="M17,17H7V14L3,18L7,22V19H19V13H17M7,7H17V10L21,6L17,2V5H5V11H7V7Z" style="display:none"/>
+          <path fill="currentColor" d="M12 5V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 2.97-2.17 5.43-5 5.91v2.02c3.95-.49 7-3.85 7-7.93 0-4.42-3.58-8-8-8zm-6 8c0-1.65.67-3.15 1.76-4.24L6.34 7.34C4.9 8.79 4 10.79 4 13c0 4.08 3.05 7.44 7 7.93v-2.02c-2.83-.48-5-2.94-5-5.91z"/>
+        </svg>
+      </button>
     <button class="control-circle" id="autoplay-toggle" aria-label="Toggle Autoplay">
       <svg viewBox="0 0 24 24">
         <path fill="currentColor" d="M17,17H7V14L3,18L7,22V19H19V13H17M7,7H17V10L21,6L17,2V5H5V11H7V7Z"/>
@@ -500,6 +515,7 @@ const shuffleButton = document.getElementById('shuffle-button');
 const volumeSlider = document.getElementById('volume-slider');
 const volumeButton = document.getElementById('volume-button');
 const autoplayToggle = document.getElementById('autoplay-toggle');
+const loopButton = document.getElementById('loop-button');
 const timeDisplay = document.getElementById('time-display');
 const searchInput = document.getElementById('search-input');
 let allMusicCards = [];
@@ -509,6 +525,7 @@ let currentTrackIndex = 0;
 let tracks = [];
 let playbackModes = {
   current: 'none',
+  loop: false,
   lastKnownIndex: -1,
   shuffledOrder: []
 };
@@ -599,7 +616,9 @@ function createMusicCard(song, index) {
   audio.addEventListener('ended', () => {
     const wasPlayingCard = audio.closest('.music-card');
     updatePlayIcon(wasPlayingCard, false);
-    if (playbackModes.current !== 'none') {
+    if (playbackModes.current === 'loop') {
+      audio.play();
+    } else if (playbackModes.current !== 'none') {
       playNextTrack();
     }
   });
@@ -677,19 +696,28 @@ function getNextTrackIndex() {
 function resetPlaybackState() {
   playbackModes.shuffledOrder = [];
   playbackModes.lastKnownIndex = -1;
+  playbackModes.loop = false;
 }
 function updateModeIndicators() {
   shuffleButton.classList.toggle('active', playbackModes.current === 'shuffle');
   autoplayToggle.classList.toggle('active', playbackModes.current === 'autoplay');
+  loopButton.classList.toggle('active', playbackModes.current === 'loop');
   if (playbackModes.current === 'shuffle') {
     shuffleButton.style.color = 'var(--shuffle-button-active-color)';
     autoplayToggle.style.color = 'var(--text-color)';
+    loopButton.style.color = 'var(--text-color)';
   } else if (playbackModes.current === 'autoplay') {
     shuffleButton.style.color = 'var(--text-color)';
     autoplayToggle.style.color = 'var(--secondary-color)';
+    loopButton.style.color = 'var(--text-color)';
+  } else if (playbackModes.current === 'loop') {
+    shuffleButton.style.color = 'var(--text-color)';
+    autoplayToggle.style.color = 'var(--text-color)';
+    loopButton.style.color = 'var(--loop-button-active-color)';
   } else {
     shuffleButton.style.color = 'var(--text-color)';
     autoplayToggle.style.color = 'var(--text-color)';
+    loopButton.style.color = 'var(--text-color)';
   }
 }
 function playNextTrack() {
@@ -750,12 +778,33 @@ prevTrackButton.addEventListener('click', playPrevTrack);
 shuffleButton.addEventListener('click', () => {
   const wasActive = playbackModes.current === 'shuffle';
   playbackModes.current = wasActive ? 'none' : 'shuffle';
-  if (playbackModes.current === 'shuffle') {
-    playbackModes.shuffledOrder = [];
-    playbackModes.lastKnownIndex = -1;
-  }
   if (!wasActive && playbackModes.current === 'shuffle') {
     autoplayToggle.classList.remove('active');
+    playbackModes.current = 'shuffle';
+    playbackModes.loop = false;
+    loopButton.classList.remove('active');
+  }
+  localStorage.setItem('playbackMode', playbackModes.current);
+  updateModeIndicators();
+});
+loopButton.addEventListener('click', () => {
+  const wasActive = playbackModes.current === 'loop';
+  playbackModes.current = wasActive ? 'none' : 'loop';
+  if (!wasActive && playbackModes.current === 'loop') {
+    autoplayToggle.classList.remove('active');
+    shuffleButton.classList.remove('active');
+    playbackModes.current = 'loop';
+  }
+  localStorage.setItem('playbackMode', playbackModes.current);
+  updateModeIndicators();
+});
+autoplayToggle.addEventListener('click', () => {
+  const wasActive = playbackModes.current === 'autoplay';
+  playbackModes.current = wasActive ? 'none' : 'autoplay';
+  if (!wasActive && playbackModes.current === 'autoplay') {
+    shuffleButton.classList.remove('active');
+    loopButton.classList.remove('active');
+    playbackModes.current = 'autoplay';
   }
   localStorage.setItem('playbackMode', playbackModes.current);
   updateModeIndicators();
@@ -923,15 +972,6 @@ volumeButton.addEventListener('click', () => {
     updateVolumeIcon(currentAudio.volume);
   }
   localStorage.setItem('volume', currentAudio ? currentAudio.volume : lastVolume);
-});
-autoplayToggle.addEventListener('click', () => {
-  const wasActive = playbackModes.current === 'autoplay';
-  playbackModes.current = wasActive ? 'none' : 'autoplay';
-  if (playbackModes.current === 'autoplay' && shuffleButton.classList.contains('active')) {
-    shuffleButton.classList.remove('active');
-  }
-  localStorage.setItem('playbackMode', playbackModes.current);
-  updateModeIndicators();
 });
 function scanForMusicFiles() {
   const songList = [{
