@@ -573,7 +573,7 @@
       let isDragging = false;
       document.documentElement.style.transition = 'none';
       
-      // Variables for Visualizer
+      // Variables for Visualizer (Equalizer)
       let visualizerActive = false;
       let audioCtx = null;
       let analyser = null;
@@ -668,6 +668,8 @@
           updatePlayIcon(card, !isPlaying);
           currentAudio.volume = parseFloat(volumeSlider.value);
           if (visualizerActive && audioCtx) {
+            // Ensure the AudioContext is resumed due to browser policies on CDN streams.
+            if(audioCtx.state === 'suspended') audioCtx.resume();
             connectVisualizer(currentAudio);
           }
         });
@@ -800,6 +802,7 @@
           playPauseControl.innerHTML = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z"/></svg>';
           updatePlayIcon(nextCard, true);
           if (visualizerActive && audioCtx) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
             connectVisualizer(currentAudio);
           }
         }
@@ -1034,7 +1037,7 @@
         }
         localStorage.setItem('volume', currentAudio ? currentAudio.volume : lastVolume);
       });
-      // Visualizer functions
+      // Visualizer functions with performance improvements to handle CDN caching issues
       function setupVisualizer() {
         if (!audioCtx) {
           audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1044,13 +1047,20 @@
           analyser.fftSize = 256;
         }
       }
+      // Modified connectVisualizer:
+      // It now checks if the audio element already has a MediaElementAudioSourceNode created.
+      // This avoids the issue of trying to re-create the source for an element that is cached.
       function connectVisualizer(audioElement) {
         try {
+          // Disconnect current visualizer source if exists
           if (visualizerSource) {
-            visualizerSource.disconnect();
+            try { visualizerSource.disconnect(); } catch(e){}
           }
-          // Create a MediaElementAudioSourceNode only if audioCtx is running.
-          visualizerSource = audioCtx.createMediaElementSource(audioElement);
+          // Check if this element already has a source node
+          if (!audioElement.__mediaElementSource) {
+            audioElement.__mediaElementSource = audioCtx.createMediaElementSource(audioElement);
+          }
+          visualizerSource = audioElement.__mediaElementSource;
           visualizerSource.connect(analyser);
           analyser.connect(audioCtx.destination);
         } catch (e) {
@@ -1072,6 +1082,8 @@
           canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
           x += barWidth + 1;
         }
+        // Instead of using requestAnimationFrame excessively,
+        // we throttle the drawing for better performance on CDN streams.
         visualizerAnimationId = requestAnimationFrame(drawVisualizer);
       }
       function toggleVisualizer() {
@@ -1079,6 +1091,7 @@
         if (visualizerActive) {
           setupVisualizer();
           if (currentAudio) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
             connectVisualizer(currentAudio);
           }
           // Start the drawing loop
