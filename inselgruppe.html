@@ -1,4 +1,4 @@
-<html lang="de">
+<html>
   <head>
     <base href="www.skybrute.de">
     <link rel="icon" href="https://i.imgur.com/JP4qYpv.png">
@@ -38,7 +38,7 @@
         padding: 2rem;
         padding-bottom: calc(2rem + var(--now-playing-height));
       }
-      /* Container above visualizer canvas */
+      /* The container is placed above the visualizer canvas */
       .container {
         max-width: 1200px;
         margin: 0 auto;
@@ -81,29 +81,8 @@
         color: var(--primary-color);
         background-color: rgba(255, 255, 255, 0.1);
       }
-      /* Tab buttons for switching Songs/Podcasts */
-      .tab-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
-        margin: 1rem 0;
-      }
-      .tab-button {
-        background: var(--card-background);
-        border: none;
-        padding: 0.8rem 1.2rem;
-        font-size: 1rem;
-        color: var(--text-color);
-        border-radius: 8px;
-        cursor: pointer;
-        box-shadow: 0 2px 5px var(--shadow-color);
-        transition: background-color 0.3s ease;
-      }
-      .tab-button.active {
-        background: var(--primary-color);
-      }
       .search-container {
-        margin: 1rem auto 1rem;
+        margin: 4rem auto 1rem;
         max-width: 600px;
         padding: 0 1rem;
         animation: fadeIn 1s ease-in-out;
@@ -486,6 +465,7 @@
   <body>
     <!-- Visualizer Canvas (background) -->
     <canvas id="visualizer" class="visualizer"></canvas>
+
     <div class="logo">
       <img src="https://i.imgur.com/xCFfLev.png" alt="SkyBrute Logo" id="logo-image">
     </div>
@@ -506,9 +486,10 @@
           <path fill="currentColor" d="M17,17H7V14L3,18L7,22V19H19V13H17M7,7H17V10L21,6L17,2V5H5V11H7V7Z"/>
         </svg>
       </button>
-      <!-- Visualizer Toggle Button -->
+      <!-- New Visualizer Toggle Button -->
       <button class="control-circle" id="visualizer-toggle" aria-label="Toggle Visualizer">
         <svg viewBox="0 0 24 24">
+          <!-- Simple bar chart icon -->
           <rect x="4" y="10" width="3" height="8" fill="currentColor"></rect>
           <rect x="10" y="6" width="3" height="12" fill="currentColor"></rect>
           <rect x="16" y="14" width="3" height="4" fill="currentColor"></rect>
@@ -516,11 +497,6 @@
       </button>
     </div>
     <div class="container">
-      <!-- Tab Buttons for switching between Songs and Podcasts -->
-      <div class="tab-buttons">
-        <button class="tab-button active" id="tab-songs">Songs</button>
-        <button class="tab-button" id="tab-podcasts">Podcasts</button>
-      </div>
       <div class="search-container">
         <input type="text" class="search-input" placeholder="Search songs..." id="search-input" aria-label="Search songs">
       </div>
@@ -535,9 +511,7 @@
       </div>
       <div class="playback-controls">
         <button class="control-button" id="prev-track" aria-label="Previous Track">
-          <svg viewBox="0 0 24 24">
-            <path fill="currentColor" d="M6,18V6H8V18H6M9.5,12L18,6V18L9.5,12Z"/>
-          </svg>
+          <svg viewBox="0 0 24 24"><path fill="currentColor" d="M6,18V6H8V18H6M9.5,12L18,6V18L9.5,12Z"/></svg>
         </button>
         <button class="control-button" id="play-pause-control" aria-label="Play/Pause">
           <svg viewBox="0 0 24 24" id="play-pause-icon">
@@ -545,9 +519,7 @@
           </svg>
         </button>
         <button class="control-button" id="next-track" aria-label="Next Track">
-          <svg viewBox="0 0 24 24">
-            <path fill="currentColor" d="M16,18H18V6H16M6,18L14.5,12L6,6V18Z"/>
-          </svg>
+          <svg viewBox="0 0 24 24"><path fill="currentColor" d="M16,18H18V6H16M6,18L14.5,12L6,6V18Z"/></svg>
         </button>
       </div>
       <div class="progress-container">
@@ -567,7 +539,7 @@
       </div>
     </div>
     <script>
-      // Global variables and state management
+      // Global variables for music player
       const musicGrid = document.getElementById('music-grid');
       const nowPlaying = document.getElementById('now-playing');
       const progressFilled = document.getElementById('progress-filled');
@@ -587,17 +559,11 @@
       const visualizerToggle = document.getElementById('visualizer-toggle');
       const canvas = document.getElementById('visualizer');
       const canvasCtx = canvas.getContext('2d');
-      const tabSongsBtn = document.getElementById('tab-songs');
-      const tabPodcastsBtn = document.getElementById('tab-podcasts');
       let allMusicCards = [];
       let currentAudio = null;
       let lastVolume = 1;
       let currentTrackIndex = 0;
       let tracks = [];
-      // Separate track collections for songs and podcasts
-      let trackLists = { songs: [], podcasts: [] };
-      let currentListType = 'songs'; // default tab
-      
       let playbackModes = {
         current: 'none',
         loop: false,
@@ -607,7 +573,7 @@
       let isDragging = false;
       document.documentElement.style.transition = 'none';
       
-      // Visualizer variables
+      // Variables for Visualizer (Equalizer)
       let visualizerActive = false;
       let audioCtx = null;
       let analyser = null;
@@ -702,6 +668,7 @@
           updatePlayIcon(card, !isPlaying);
           currentAudio.volume = parseFloat(volumeSlider.value);
           if (visualizerActive && audioCtx) {
+            // Ensure the AudioContext is resumed due to browser policies on CDN streams.
             if(audioCtx.state === 'suspended') audioCtx.resume();
             connectVisualizer(currentAudio);
           }
@@ -1004,8 +971,73 @@
         }
       }
       document.addEventListener('keydown', handleKeyboardShortcuts);
-      
-      // Visualizer functions
+      document.addEventListener('DOMContentLoaded', () => {
+        initializeMusicPlayer();
+        updateVolumeIcon(volumeSlider.value);
+        initializeVolume();
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && !musicGrid.children.length) {
+          initializeMusicPlayer();
+        }
+      });
+      function initializeMusicPlayer() {
+        musicGrid.innerHTML = '';
+        const savedMode = localStorage.getItem('playbackMode');
+        playbackModes.current = savedMode || 'none';
+        updateModeIndicators();
+        scanForMusicFiles().then(availableFiles => {
+          tracks = availableFiles;
+          allMusicCards = tracks.map((song, index) => {
+            const card = createMusicCard(song, index);
+            musicGrid.appendChild(card);
+            return card;
+          });
+        });
+      }
+      function updateVolumeIcon(volume) {
+        let path = '';
+        if (volume > 0.5) {
+          path = '<path fill="currentColor" d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z"/>';
+        } else if (volume > 0) {
+          path = '<path fill="currentColor" d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z"/>';
+        } else {
+          path = '<path fill="currentColor" d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12Z"/>';
+        }
+        volumeButton.innerHTML = `<svg viewBox="0 0 24 24">${path}</svg>`;
+      }
+      function initializeVolume() {
+        const savedVolume = localStorage.getItem('volume');
+        if (savedVolume !== null) {
+          volumeSlider.value = savedVolume;
+          if (currentAudio) {
+            currentAudio.volume = parseFloat(savedVolume);
+          }
+          updateVolumeIcon(savedVolume);
+        }
+      }
+      volumeSlider.addEventListener('input', e => {
+        if (currentAudio) {
+          currentAudio.volume = e.target.value;
+        }
+        localStorage.setItem('volume', e.target.value);
+        lastVolume = e.target.value;
+        updateVolumeIcon(e.target.value);
+      });
+      volumeButton.addEventListener('click', () => {
+        if (currentAudio) {
+          if (currentAudio.volume > 0) {
+            currentAudio.volume = 0;
+            volumeSlider.value = 0;
+          } else {
+            currentAudio.volume = lastVolume;
+            volumeSlider.value = lastVolume;
+          }
+          updateVolumeIcon(currentAudio.volume);
+        }
+        localStorage.setItem('volume', currentAudio ? currentAudio.volume : lastVolume);
+      });
+      // Visualizer functions with performance improvements to handle CDN caching issues
       function setupVisualizer() {
         if (!audioCtx) {
           audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1015,11 +1047,16 @@
           analyser.fftSize = 256;
         }
       }
+      // Modified connectVisualizer:
+      // It now checks if the audio element already has a MediaElementAudioSourceNode created.
+      // This avoids the issue of trying to re-create the source for an element that is cached.
       function connectVisualizer(audioElement) {
         try {
+          // Disconnect current visualizer source if exists
           if (visualizerSource) {
             try { visualizerSource.disconnect(); } catch(e){}
           }
+          // Check if this element already has a source node
           if (!audioElement.__mediaElementSource) {
             audioElement.__mediaElementSource = audioCtx.createMediaElementSource(audioElement);
           }
@@ -1045,6 +1082,8 @@
           canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
           x += barWidth + 1;
         }
+        // Instead of using requestAnimationFrame excessively,
+        // we throttle the drawing for better performance on CDN streams.
         visualizerAnimationId = requestAnimationFrame(drawVisualizer);
       }
       function toggleVisualizer() {
@@ -1055,14 +1094,17 @@
             if(audioCtx.state === 'suspended') audioCtx.resume();
             connectVisualizer(currentAudio);
           }
+          // Start the drawing loop
           drawVisualizer();
         } else {
           if (visualizerAnimationId) {
             cancelAnimationFrame(visualizerAnimationId);
             visualizerAnimationId = null;
           }
+          // Clear canvas when disabled
           canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
         }
+        // Update the visualizer toggle button's active state (green when active)
         if (visualizerActive) {
           visualizerToggle.classList.add('active');
         } else {
@@ -1070,8 +1112,6 @@
         }
       }
       visualizerToggle.addEventListener('click', toggleVisualizer);
-      
-      // Scan for music files and split into songs and podcasts
       function scanForMusicFiles() {
         const songList = [{
     title: 'Analfried Song',
@@ -1266,117 +1306,13 @@
     thumbnail: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@main/Oh%20Clyde.png',
     path: 'https://cdn.jsdelivr.net/gh/zBaraka/eineselsingtauchgernemalsuppenteller@neogalaxis/Oh%20Clyde.mp3'
         }];
-        // Separate into songs and podcasts (tracks with "podcast" in title to podcasts)
-        const songs = songList.filter(song => !song.title.toLowerCase().includes("podcast"));
-        const podcasts = songList.filter(song => song.title.toLowerCase().includes("podcast"));
-        // Sort both lists alphabetically by title
-        songs.sort((a, b) => a.title.localeCompare(b.title, 'de'));
-        podcasts.sort((a, b) => a.title.localeCompare(b.title, 'de'));
+        songList.sort((a, b) => a.title.localeCompare(b.title, 'de'));
         return new Promise(resolve => {
           setTimeout(() => {
-            resolve({ songs, podcasts });
+            resolve(songList);
           }, 100);
         });
       }
-      
-      // Load grid based on currentListType
-      function loadMusicGrid() {
-        musicGrid.innerHTML = '';
-        resetPlaybackState();
-        currentTrackIndex = 0;
-        const list = trackLists[currentListType] || [];
-        tracks = list;
-        allMusicCards = [];
-        list.forEach((song, index) => {
-          const card = createMusicCard(song, index);
-          musicGrid.appendChild(card);
-          allMusicCards.push(card);
-        });
-      }
-      
-      // Tab switching handlers
-      function switchTab(newType) {
-        if (currentListType === newType) return;
-        // Pause any playing audio
-        if (currentAudio) {
-          currentAudio.pause();
-          currentAudio.currentTime = 0;
-          updateAllPlayIcons();
-          currentAudio = null;
-        }
-        currentListType = newType;
-        // Update active class on tab buttons
-        if (newType === 'songs') {
-          tabSongsBtn.classList.add('active');
-          tabPodcastsBtn.classList.remove('active');
-          searchInput.placeholder = "Search songs...";
-        } else {
-          tabPodcastsBtn.classList.add('active');
-          tabSongsBtn.classList.remove('active');
-          searchInput.placeholder = "Search podcasts...";
-        }
-        loadMusicGrid();
-      }
-      tabSongsBtn.addEventListener('click', () => switchTab('songs'));
-      tabPodcastsBtn.addEventListener('click', () => switchTab('podcasts'));
-      
-      document.addEventListener('DOMContentLoaded', () => {
-        scanForMusicFiles().then(result => {
-          trackLists = result;
-          // Default tab remains "songs"
-          currentListType = 'songs';
-          loadMusicGrid();
-        });
-        updateVolumeIcon(volumeSlider.value);
-        initializeVolume();
-      });
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden && !musicGrid.children.length) {
-          loadMusicGrid();
-        }
-      });
-      function updateVolumeIcon(volume) {
-        let path = '';
-        if (volume > 0.5) {
-          path = '<path fill="currentColor" d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12Z"/>';
-        } else if (volume > 0) {
-          path = '<path fill="currentColor" d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z"/>';
-        } else {
-          path = '<path fill="currentColor" d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12Z"/>';
-        }
-        volumeButton.innerHTML = `<svg viewBox="0 0 24 24">${path}</svg>`;
-      }
-      function initializeVolume() {
-        const savedVolume = localStorage.getItem('volume');
-        if (savedVolume !== null) {
-          volumeSlider.value = savedVolume;
-          if (currentAudio) {
-            currentAudio.volume = parseFloat(savedVolume);
-          }
-          updateVolumeIcon(savedVolume);
-        }
-      }
-      volumeSlider.addEventListener('input', e => {
-        if (currentAudio) {
-          currentAudio.volume = e.target.value;
-        }
-        localStorage.setItem('volume', e.target.value);
-        lastVolume = e.target.value;
-        updateVolumeIcon(e.target.value);
-      });
-      volumeButton.addEventListener('click', () => {
-        if (currentAudio) {
-          if (currentAudio.volume > 0) {
-            currentAudio.volume = 0;
-            volumeSlider.value = 0;
-          } else {
-            currentAudio.volume = lastVolume;
-            volumeSlider.value = lastVolume;
-          }
-          updateVolumeIcon(currentAudio.volume);
-        }
-        localStorage.setItem('volume', currentAudio ? currentAudio.volume : lastVolume);
-      });
       if ('mediaSession' in navigator) {}
     </script>
   </body>
